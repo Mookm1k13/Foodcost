@@ -1,0 +1,2625 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food Cost & Profit Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F0E2;
+  --surface:#FFFCF5;
+  --surface-2:#FBF5E9;
+  --ink:#2A2420;
+  --ink-soft:#6E6255;
+  --ink-faint:#9C9080;
+  --line:#E6D8BE;
+  --line-soft:#EFE4CE;
+  --rail:#2A231C;
+  --rail-ink:#E9DFCC;
+  --rail-ink-soft:#A99A83;
+  --turmeric:#D9971F;
+  --turmeric-deep:#B87A15;
+  --chili:#C14A2B;
+  --herb:#5C7A4E;
+  --herb-deep:#3F5636;
+  --clay:#8A5A3B;
+  --danger:#B23B3B;
+  --danger-bg:#F7E4DF;
+  --warn:#B8791A;
+  --warn-bg:#FAEBCF;
+  --good:#3F6B3F;
+  --good-bg:#E6EFDE;
+  --shadow: 0 1px 0 rgba(42,36,32,0.04);
+  --radius-s:6px;
+  --radius-m:10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Sarabun',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,.brand,.nav-label{font-family:'Kanit',sans-serif;}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+button{cursor:pointer;}
+a{color:inherit;}
+::selection{background:var(--turmeric);color:#fff;}
+
+.app{
+  display:grid;
+  grid-template-columns:236px 1fr;
+  min-height:100vh;
+  min-width:0;
+}
+
+/* ---------- SIDEBAR ---------- */
+.sidebar{
+  background:var(--rail);
+  color:var(--rail-ink);
+  padding:22px 14px 18px;
+  display:flex;
+  flex-direction:column;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto;
+}
+.brand{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  padding:0 8px 4px;
+  margin-bottom:2px;
+}
+.brand-mark{
+  width:9px;height:9px;border-radius:50%;
+  background:var(--turmeric);
+  flex:0 0 auto;
+  transform:translateY(-1px);
+}
+.brand-text{font-weight:600;font-size:17px;color:#fff;letter-spacing:.2px;}
+.brand-sub{
+  padding:0 8px 22px;
+  font-size:12px;
+  color:var(--rail-ink-soft);
+  border-bottom:1px solid rgba(233,223,204,0.12);
+  margin-bottom:14px;
+}
+nav.navlist{display:flex;flex-direction:column;gap:2px;}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:10px 12px;
+  border-radius:8px;
+  color:var(--rail-ink-soft);
+  background:transparent;
+  border:none;
+  text-align:right;
+  width:100%;
+  font-size:14.5px;
+  transition:background .12s ease, color .12s ease;
+}
+.nav-item .ic{font-size:16px;width:20px;text-align:center;flex:0 0 auto;}
+.nav-item:hover{background:rgba(233,223,204,0.08);color:var(--rail-ink);}
+.nav-item.active{
+  background:rgba(217,151,31,0.16);
+  color:#fff;
+  box-shadow:inset 3px 0 0 var(--turmeric);
+}
+.sidebar-foot{
+  margin-top:auto;
+  padding:14px 10px 2px;
+  font-size:11.5px;
+  color:var(--rail-ink-soft);
+  border-top:1px solid rgba(233,223,204,0.12);
+  padding-top:14px;
+}
+
+/* ---------- MAIN ---------- */
+main{padding:26px 34px 60px;max-width:1280px;min-width:0;}
+.page{display:none;}
+.page.active{display:block;animation:fadein .18s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
+
+.page-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  margin-bottom:22px;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.page-title{font-size:23px;font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:10px;}
+.page-desc{color:var(--ink-soft);font-size:13.5px;margin:0;}
+.page-actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* buttons */
+.btn{
+  border:1px solid var(--line);
+  background:var(--surface);
+  padding:9px 15px;
+  border-radius:8px;
+  font-size:14px;
+  font-weight:500;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  transition:border-color .12s, background .12s;
+}
+.btn:hover{border-color:var(--ink-faint);}
+.btn-primary{
+  background:var(--rail);
+  color:#fff;
+  border-color:var(--rail);
+}
+.btn-primary:hover{background:#3a3226;}
+.btn-accent{background:var(--turmeric);border-color:var(--turmeric);color:#2A2420;font-weight:600;}
+.btn-accent:hover{background:var(--turmeric-deep);}
+.btn-danger{color:var(--danger);border-color:var(--danger-bg);background:var(--danger-bg);}
+.btn-danger:hover{border-color:var(--danger);}
+.btn-ghost{border-color:transparent;background:transparent;padding:7px 10px;}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-sm{padding:6px 11px;font-size:13px;border-radius:7px;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+
+/* cards */
+.cards-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:14px;
+  margin-bottom:24px;
+}
+.stat-card{
+  background:var(--surface);
+  border:1px solid var(--line-soft);
+  border-radius:var(--radius-m);
+  padding:16px 18px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.stat-card::before{
+  content:"";
+  position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:var(--accent,var(--turmeric));
+}
+.stat-card .stat-label{font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;}
+.stat-card .stat-value{font-size:23px;font-weight:600;font-family:'Kanit',sans-serif;}
+.stat-card .stat-note{font-size:12px;color:var(--ink-faint);margin-top:4px;}
+
+.panel{
+  background:var(--surface);
+  border:1px solid var(--line-soft);
+  border-radius:var(--radius-m);
+  padding:18px 20px 20px;
+  margin-bottom:20px;
+  box-shadow:var(--shadow);
+  min-width:0;
+}
+.panel-title{font-size:15.5px;font-weight:600;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.panel-title small{font-size:12px;font-weight:400;color:var(--ink-soft);}
+
+/* toolbar */
+.toolbar{
+  display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;
+}
+.search-box{
+  display:flex;align-items:center;gap:7px;
+  border:1px solid var(--line);border-radius:8px;
+  padding:7px 12px;background:var(--surface-2);
+  min-width:210px;flex:1 1 220px;
+}
+.search-box input{border:none;background:none;outline:none;width:100%;font-size:13.5px;}
+.search-box .ic{color:var(--ink-faint);font-size:13px;}
+select.filter-select{
+  border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface-2);font-size:13.5px;
+}
+
+/* table */
+.table-scroll{
+  width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  border:1px solid var(--line-soft);
+  border-radius:var(--radius-m);
+  background:var(--surface);
+}
+table.data-table{width:100%;border-collapse:collapse;font-size:13.8px;margin:0 auto;}
+.data-table thead th{
+  text-align:center;
+  font-weight:600;
+  color:var(--ink-soft);
+  font-size:12.5px;
+  padding:9px 12px;
+  border-bottom:1.5px solid var(--line);
+  white-space:nowrap;
+  background:var(--surface-2);
+}
+.data-table thead th:first-child, .data-table tbody td:first-child{text-align:center;}
+.data-table tbody td{padding:11px 12px;border-bottom:1px solid var(--line-soft);vertical-align:middle;white-space:nowrap;text-align:center;}
+.data-table tbody tr:nth-child(even){background:rgba(42,36,32,0.018);}
+.data-table tbody tr:hover{background:var(--surface-2);}
+.data-table tbody tr:last-child td{border-bottom:none;}
+.data-table .num{text-align:center;font-variant-numeric:tabular-nums;}
+.data-table .row-actions{display:flex;gap:6px;justify-content:center;}
+.data-table .cell-strong, .data-table td:first-child{white-space:normal;min-width:110px;}
+.cell-strong{font-weight:600;}
+.cell-sub{color:var(--ink-faint);font-size:12px;}
+.empty-row td{text-align:center;color:var(--ink-faint);padding:34px 10px;font-size:13.5px;}
+
+/* badges */
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:100px;font-size:12px;font-weight:600;white-space:nowrap;
+}
+.badge .dot{width:6px;height:6px;border-radius:50%;}
+.badge-good{background:var(--good-bg);color:var(--good-deep,var(--good));}
+.badge-good .dot{background:var(--good);}
+.badge-warn{background:var(--warn-bg);color:#8a5c10;}
+.badge-warn .dot{background:var(--warn);}
+.badge-danger{background:var(--danger-bg);color:var(--danger);}
+.badge-danger .dot{background:var(--danger);}
+.badge-neutral{background:var(--surface-2);color:var(--ink-soft);border:1px solid var(--line);}
+
+/* form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;}
+.form-grid.cols-1{grid-template-columns:1fr;}
+.form-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field.span-2{grid-column:span 2;}
+.field label{font-size:12.8px;font-weight:600;color:var(--ink-soft);}
+.field .hint{font-size:11.5px;color:var(--ink-faint);font-weight:400;}
+.field input, .field select, .field textarea{
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:9px 11px;
+  background:var(--surface-2);
+  outline:none;
+  font-size:14px;
+  width:100%;
+}
+.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--turmeric);background:var(--surface);}
+.field textarea{resize:vertical;min-height:64px;}
+.radio-group{display:flex;gap:14px;flex-wrap:wrap;}
+.radio-opt{display:flex;align-items:center;gap:6px;font-size:13.5px;}
+
+/* modal */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(30,25,20,0.45);
+  display:none;align-items:flex-start;justify-content:center;
+  padding:5vh 16px;z-index:100;overflow-y:auto;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--surface);
+  border-radius:14px;
+  width:100%;max-width:560px;
+  padding:22px 24px 24px;
+  box-shadow:0 20px 50px rgba(20,15,10,0.25);
+  border:1px solid var(--line-soft);
+}
+.modal.wide{max-width:760px;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.modal-head h3{margin:0;font-size:17px;font-weight:600;}
+.modal-close{background:none;border:none;font-size:20px;color:var(--ink-faint);line-height:1;padding:4px;}
+.modal-close:hover{color:var(--ink);}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line-soft);}
+
+/* recipe builder rows */
+.line-rows{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+.line-row{
+  display:grid;grid-template-columns:1.6fr 0.7fr 0.7fr auto;gap:8px;align-items:center;
+  background:var(--surface-2);padding:8px;border-radius:8px;border:1px solid var(--line-soft);
+}
+.line-row select, .line-row input{padding:7px 9px;font-size:13.5px;}
+.line-row.cost-line-row{grid-template-columns:1.8fr 1fr auto;}
+.add-line-btn{align-self:flex-start;}
+
+/* calc summary box */
+.calc-box{
+  background:var(--surface-2);
+  border:1px dashed var(--line);
+  border-radius:10px;
+  padding:14px 16px;
+  margin-top:8px;
+}
+.calc-row{display:flex;justify-content:space-between;font-size:13.8px;padding:5px 0;}
+.calc-row.total{border-top:1px solid var(--line);margin-top:6px;padding-top:10px;font-weight:700;font-size:15.5px;}
+.calc-row .neg{color:var(--danger);}
+.calc-row .pos{color:var(--good);}
+.calc-row span:first-child{color:var(--ink-soft);}
+.calc-row.total span:first-child{color:var(--ink);}
+
+/* misc */
+.two-col{display:grid;grid-template-columns:1.15fr 0.85fr;gap:18px;align-items:start;}
+@media (max-width:980px){.two-col{grid-template-columns:1fr;}}
+.tag-pill{
+  display:inline-block;padding:2px 9px;border-radius:100px;font-size:11.5px;
+  background:var(--surface-2);border:1px solid var(--line);color:var(--ink-soft);
+}
+.muted{color:var(--ink-faint);}
+.mini-list{display:flex;flex-direction:column;gap:10px;}
+.mini-list-item{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--surface-2);border-radius:8px;border:1px solid var(--line-soft);}
+.mini-list-item .name{font-weight:600;font-size:13.8px;}
+.mini-list-item .val{font-family:'Kanit',sans-serif;font-weight:600;}
+.bar-item{padding:8px 2px;}
+.bar-item-top{display:flex;justify-content:space-between;font-size:13.2px;margin-bottom:6px;}
+.bar-item-top .name{font-weight:600;}
+.bar-item-top .val{font-family:'Kanit',sans-serif;font-weight:600;color:var(--turmeric-deep);}
+.bar-track{height:7px;border-radius:100px;background:var(--surface-2);border:1px solid var(--line-soft);overflow:hidden;}
+.bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--turmeric),var(--chili));}
+.seg-tabs{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;}
+.seg-tab{border:none;background:none;padding:7px 15px;border-radius:7px;font-size:13.2px;font-weight:500;color:var(--ink-soft);white-space:nowrap;}
+.seg-tab:hover:not(.active){background:rgba(42,36,32,0.06);}
+.seg-tab.active{background:var(--rail);color:#fff;}
+.dash-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.dash-toolbar .range-label{font-size:12.8px;color:var(--ink-soft);}
+.toast-wrap{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;}
+.toast{background:var(--rail);color:#fff;padding:10px 18px;border-radius:100px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:toastin .2s ease;}
+@keyframes toastin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.icon-btn{border:1px solid var(--line);background:var(--surface);width:30px;height:30px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;}
+.icon-btn:hover{border-color:var(--ink-faint);}
+.kv-line{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px;}
+.kv-line:last-child{border-bottom:none;}
+.kv-line b{font-family:'Kanit',sans-serif;}
+.result-callout{
+  background:linear-gradient(135deg, rgba(217,151,31,0.13), rgba(217,151,31,0.04));
+  border:1px solid rgba(217,151,31,0.35);
+  border-radius:12px;padding:18px 20px;text-align:center;margin-top:10px;
+}
+.result-callout .big{font-family:'Kanit',sans-serif;font-size:30px;font-weight:700;color:var(--turmeric-deep);}
+.result-callout .sub{font-size:12.8px;color:var(--ink-soft);margin-top:4px;}
+
+@media (max-width:860px){
+  .app{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
+  .sidebar{
+    position:sticky;top:0;height:auto;align-self:start;z-index:50;
+    flex-direction:row;overflow-x:auto;overflow-y:hidden;
+    padding:8px 10px;gap:0;align-items:center;
+    scrollbar-width:none;
+    box-shadow:0 2px 12px rgba(20,15,10,0.25);
+  }
+  .sidebar::-webkit-scrollbar{display:none;}
+  .brand,.brand-sub,.sidebar-foot{display:none;}
+  nav.navlist{flex-direction:row;gap:4px;margin:0 auto;}
+  .nav-item{flex:0 0 auto;width:auto;white-space:nowrap;flex-direction:column;justify-content:center;text-align:center;gap:3px;padding:8px 12px;font-size:11.5px;line-height:1.3;}
+  .nav-item.active{box-shadow:inset 0 3px 0 var(--turmeric);}
+  main{padding:18px 16px 50px;}
+  .form-grid, .form-grid.cols-3{grid-template-columns:1fr;}
+  .field.span-2{grid-column:span 1;}
+  .line-row{grid-template-columns:1fr;}
+}
+
+/* ---------- PHONE ---------- */
+@media (max-width:640px){
+  html{-webkit-text-size-adjust:100%;}
+  .app{grid-template-columns:1fr;}
+  main{padding:14px 12px 96px;max-width:100%;}
+
+  /* bottom tab bar nav, thumb-reachable, horizontally scrollable */
+  .sidebar{
+    position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;
+    flex-direction:row;padding:5px 6px calc(5px + env(safe-area-inset-bottom));
+    background:var(--rail);
+    box-shadow:0 -3px 16px rgba(20,15,10,0.22);
+    z-index:60;
+  }
+  nav.navlist{
+    flex-direction:row;gap:2px;width:100%;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  nav.navlist::-webkit-scrollbar{display:none;}
+  .nav-item{
+    flex:0 0 auto;width:auto;min-width:60px;
+    flex-direction:column;gap:3px;text-align:center;white-space:nowrap;
+    padding:7px 9px;font-size:10.2px;border-radius:10px;
+  }
+  .nav-item .ic{font-size:17px;}
+  .nav-item.active{box-shadow:none;background:rgba(217,151,31,0.2);}
+
+  /* page header */
+  .page-head{flex-direction:column;align-items:stretch;gap:10px;margin-bottom:16px;}
+  .page-title{font-size:18.5px;gap:8px;}
+  .page-desc{font-size:12.3px;}
+  .page-actions{flex-direction:column;gap:8px;}
+  .page-actions>*{width:100%;justify-content:center;}
+
+  /* cards */
+  .cards-row{grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:9px;margin-bottom:18px;}
+  .stat-card{padding:12px 13px;}
+  .stat-card .stat-value{font-size:18px;}
+  .stat-card .stat-label{font-size:11.8px;}
+
+  /* panels + tables: scroll horizontally instead of squeezing columns */
+  .panel{padding:14px 14px 16px;margin-bottom:14px;}
+  .panel-title{font-size:14.5px;flex-wrap:wrap;}
+  .table-scroll{border-radius:8px;}
+  table.data-table{min-width:540px;font-size:12.6px;}
+  .data-table thead th, .data-table tbody td{padding:9px 10px;}
+  /* keep the first (label) column visible while scrolling the rest */
+  .data-table thead th:first-child, .data-table tbody td:first-child{
+    position:sticky;left:0;z-index:1;
+    box-shadow:1px 0 0 var(--line-soft);
+  }
+  .data-table tbody td:first-child{background:var(--surface);}
+  .data-table tbody tr:nth-child(even) td:first-child{background:#FBF8F1;}
+  .data-table tbody tr:hover td:first-child{background:var(--surface-2);}
+
+  /* toolbar */
+  .toolbar{gap:8px;}
+  .search-box{min-width:0;flex:1 1 100%;}
+  select.filter-select{flex:1 1 100%;}
+
+  /* modal as a bottom sheet */
+  .modal-overlay{padding:0;align-items:flex-end;}
+  .modal{
+    max-width:100%;width:100%;border-radius:16px 16px 0 0;
+    max-height:90vh;overflow-y:auto;
+    padding:16px 16px calc(18px + env(safe-area-inset-bottom));
+  }
+  .modal-head h3{font-size:16px;}
+  .modal-close{width:34px;height:34px;font-size:20px;}
+  .modal-foot{flex-direction:column-reverse;gap:8px;}
+  .modal-foot .btn{width:100%;justify-content:center;}
+
+  /* forms */
+  .form-grid, .form-grid.cols-3{grid-template-columns:1fr;}
+  .field.span-2{grid-column:span 1;}
+  .line-row{grid-template-columns:1fr;}
+
+  /* bigger touch targets */
+  .btn{min-height:42px;}
+  .btn-sm{min-height:36px;}
+  .icon-btn{width:36px;height:36px;}
+  .seg-tab{padding:9px 14px;font-size:12.5px;}
+  .field input, .field select, .field textarea{padding:10px 11px;font-size:16px;}
+
+  .dash-toolbar{flex-direction:column;align-items:stretch;gap:10px;}
+  .dash-toolbar .seg-tabs{width:100%;justify-content:space-between;}
+  .dash-toolbar .seg-tab{flex:1 1 0;min-width:0;text-align:center;overflow:hidden;text-overflow:ellipsis;}
+
+  /* keep toast above the bottom tab bar */
+  .toast-wrap{bottom:calc(64px + env(safe-area-inset-bottom));}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark"></span><span class="brand-text">Food Cost</span></div>
+    <div class="brand-sub">ระบบจัดการต้นทุนและกำไรร้านอาหาร</div>
+    <nav class="navlist" id="navlist">
+      <button class="nav-item" data-page="dashboard"><span class="ic">📊</span><span>Dashboard</span></button>
+      <button class="nav-item" data-page="ingredients"><span class="ic">🥬</span><span>วัตถุดิบ</span></button>
+      <button class="nav-item" data-page="purchases"><span class="ic">🛒</span><span>การซื้อ</span></button>
+      <button class="nav-item" data-page="stock"><span class="ic">📦</span><span>Stock</span></button>
+      <button class="nav-item" data-page="recipes"><span class="ic">🍳</span><span>สูตรอาหาร</span></button>
+      <button class="nav-item" data-page="pricing"><span class="ic">💰</span><span>ราคาขาย & กำไร</span></button>
+      <button class="nav-item" data-page="platforms"><span class="ic">🏪</span><span>Platform</span></button>
+      <button class="nav-item" data-page="promotions"><span class="ic">🎟</span><span>Promotion</span></button>
+      <button class="nav-item" data-page="overhead"><span class="ic">🏛</span><span>ต้นทุนคงที่</span></button>
+      <button class="nav-item" data-page="reports"><span class="ic">🧾</span><span>รายงานสรุป</span></button>
+    </nav>
+    <div class="sidebar-foot">ข้อมูลบันทึกอัตโนมัติในเครื่องนี้ (LocalStorage)</div>
+  </aside>
+
+  <main id="main">
+    <!-- Pages injected by JS -->
+    <div class="page" id="page-dashboard"></div>
+    <div class="page" id="page-ingredients"></div>
+    <div class="page" id="page-purchases"></div>
+    <div class="page" id="page-stock"></div>
+    <div class="page" id="page-recipes"></div>
+    <div class="page" id="page-pricing"></div>
+    <div class="page" id="page-platforms"></div>
+    <div class="page" id="page-promotions"></div>
+    <div class="page" id="page-overhead"></div>
+    <div class="page" id="page-reports"></div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <div class="modal-head">
+      <h3 id="modalTitle">Title</h3>
+      <button class="modal-close" id="modalCloseBtn">&times;</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* =========================================================
+   Food Cost & Profit Manager — app.js
+   Vanilla JS, single file, LocalStorage-backed
+   ========================================================= */
+
+/* ---------------- Utilities ---------------- */
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(d){
+  if(!d) return '-';
+  const dt = new Date(d+'T00:00:00');
+  if(isNaN(dt)) return d;
+  return dt.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function fmtMoney(n){
+  n = Number(n)||0;
+  return n.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtNum(n, d){
+  n = Number(n)||0;
+  return n.toLocaleString('th-TH',{minimumFractionDigits:d||0,maximumFractionDigits:d===undefined?2:d});
+}
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function toast(msg){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className='toast';
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .25s'; el.style.opacity='0'; setTimeout(()=>el.remove(),250); }, 2200);
+}
+
+/* ---------------- Unit conversion ---------------- */
+const WEIGHT_UNITS = {g:1, kg:1000};
+const VOLUME_UNITS = {ml:1, l:1000};
+const COMMON_UNITS = ['kg','g','l','ml','ฟอง','ใบ','ชิ้น','กล่อง','ก้อน','ช้อนโต๊ะ','ช้อนชา','แผ่น','ลูก','หัว','ต้น','กำ','ขวด','ถุง'];
+function unitGroup(u){
+  if(WEIGHT_UNITS[u]!==undefined) return 'weight';
+  if(VOLUME_UNITS[u]!==undefined) return 'volume';
+  return 'count:'+u;
+}
+// returns converted qty in toUnit, or null if incompatible
+function convertQty(qty, fromUnit, toUnit){
+  if(fromUnit===toUnit) return qty;
+  if(WEIGHT_UNITS[fromUnit]!==undefined && WEIGHT_UNITS[toUnit]!==undefined){
+    return qty*WEIGHT_UNITS[fromUnit]/WEIGHT_UNITS[toUnit];
+  }
+  if(VOLUME_UNITS[fromUnit]!==undefined && VOLUME_UNITS[toUnit]!==undefined){
+    return qty*VOLUME_UNITS[fromUnit]/VOLUME_UNITS[toUnit];
+  }
+  return null;
+}
+function unitDatalist(){
+  return `<datalist id="unitList">${COMMON_UNITS.map(u=>`<option value="${u}">`).join('')}</datalist>`;
+}
+
+/* ---------------- Storage ---------------- */
+const DB_KEYS = ['ingredients','purchases','stockMovements','recipes','platforms','promotions','sales','settings'];
+function loadAll(){
+  DB_KEYS.forEach(k=>{
+    const raw = localStorage.getItem('fcpm_'+k);
+    if(raw===null){
+      DB[k] = k==='settings' ? {costMethod:'latest', fixedOverhead:[]} : [];
+    } else {
+      try{ DB[k] = JSON.parse(raw); } catch(e){ DB[k] = k==='settings'?{costMethod:'latest', fixedOverhead:[]}:[]; }
+    }
+  });
+  // migration: older saved settings may not have fixedOverhead yet
+  if(!DB.settings.fixedOverhead) DB.settings.fixedOverhead = [];
+}
+function save(key){
+  localStorage.setItem('fcpm_'+key, JSON.stringify(DB[key]));
+}
+const DB = {};
+
+
+function recomputeIngredientPricing(ingredientId, doSave){
+  const list = DB.purchases.filter(p=>p.ingredientId===ingredientId).sort((a,b)=> a.date<b.date?-1:1);
+  const ingr = DB.ingredients.find(i=>i.id===ingredientId);
+  if(!ingr) return;
+  if(list.length===0){ ingr.latestPrice=0; ingr.avgPrice=0; }
+  else{
+    ingr.latestPrice = list[list.length-1].pricePerUnit;
+    const totalCost = list.reduce((s,p)=>s+p.price,0);
+    const totalQty = list.reduce((s,p)=>s+p.qty,0);
+    ingr.avgPrice = totalQty>0 ? totalCost/totalQty : 0;
+  }
+  if(doSave!==false) save('ingredients');
+}
+function purchaseStats(ingredientId){
+  const list = DB.purchases.filter(p=>p.ingredientId===ingredientId);
+  if(list.length===0) return {min:0,max:0,count:0};
+  const prices = list.map(p=>p.pricePerUnit);
+  return {min:Math.min(...prices), max:Math.max(...prices), count:list.length};
+}
+function getStock(ingredientId){
+  return DB.stockMovements.filter(m=>m.ingredientId===ingredientId).reduce((s,m)=>s+m.qty,0);
+}
+function stockStatusOf(ingredientId){
+  const ingr = DB.ingredients.find(i=>i.id===ingredientId);
+  const stock = getStock(ingredientId);
+  if(stock<=0) return 'danger';
+  if(stock<= (ingr?ingr.minStock:0)) return 'warn';
+  return 'good';
+}
+function statusBadge(status){
+  const map = {
+    good:{cls:'badge-good', text:'ปกติ', dot:'🟢'},
+    warn:{cls:'badge-warn', text:'ใกล้หมด', dot:'🟡'},
+    danger:{cls:'badge-danger', text:'หมด', dot:'🔴'}
+  };
+  const m = map[status];
+  return `<span class="badge ${m.cls}"><span class="dot"></span>${m.text}</span>`;
+}
+function addStockMovement(ingredientId, type, qty, note, ref, date){
+  DB.stockMovements.push({id:uid(), ingredientId, date: date||todayStr(), type, qty, note: note||'', ref: ref||null});
+  save('stockMovements');
+}
+function ingrById(id){ return DB.ingredients.find(i=>i.id===id); }
+function recipeById(id){ return DB.recipes.find(r=>r.id===id); }
+function platformById(id){ return DB.platforms.find(p=>p.id===id); }
+function promoById(id){ return DB.promotions.find(p=>p.id===id); }
+
+/* ---------------- Fixed overhead / break-even ---------------- */
+function totalMonthlyOverhead(){
+  return (DB.settings.fixedOverhead||[]).reduce((s,x)=>s+(Number(x.amount)||0),0);
+}
+function daysInMonthOf(monthKey){ // 'YYYY-MM' -> number of days in that month
+  const [y,mo] = monthKey.split('-').map(Number);
+  return new Date(y, mo, 0).getDate();
+}
+function daysCountInRange(range){
+  // นับจำนวนวันของช่วง ถ้าไม่มี start/end ชัดเจน (เช่นเลือก "ทั้งหมด") จะคืน null เพราะเฉลี่ยต้นทุนคงที่ไม่ได้
+  if(!range.start || !range.end) return null;
+  const s = new Date(range.start+'T00:00:00'), e = new Date(range.end+'T00:00:00');
+  if(isNaN(s)||isNaN(e)) return null;
+  return Math.round((e-s)/86400000)+1;
+}
+
+function computeRecipeCost(recipe){
+  const method = DB.settings.costMethod || 'latest';
+  let ingredientCost = 0;
+  let hasUnitError = false;
+  const lines = recipe.items.map(item=>{
+    const ingr = ingrById(item.ingredientId);
+    if(!ingr){ hasUnitError = true; return {name:'(ลบแล้ว)', qty:item.qty, unit:item.unit, cost:0, warn:true, warnReason:'ลบแล้ว'}; }
+    const unitPrice = method==='latest' ? ingr.latestPrice : ingr.avgPrice;
+    const converted = convertQty(item.qty, item.unit, ingr.unit);
+    // หน่วยไม่ตรงกัน (แปลงไม่ได้) ต้องไม่ยอมคำนวณต้นทุนบรรทัดนี้ แทนที่จะเดาว่าหน่วยเท่ากัน
+    if(converted===null){
+      hasUnitError = true;
+      return {name:ingr.name, qty:item.qty, unit:item.unit, unitPrice, cost:0, warn:true, warnReason:`หน่วย "${item.unit}" แปลงเป็น "${ingr.unit}" ไม่ได้`};
+    }
+    const cost = unitPrice * converted;
+    ingredientCost += cost;
+    return {name:ingr.name, qty:item.qty, unit:item.unit, unitPrice, cost, warn:false};
+  });
+  const otherCostItems = (recipe.otherCostItems && recipe.otherCostItems.length)
+    ? recipe.otherCostItems
+    : (Number(recipe.otherCost)>0 ? [{name:'ต้นทุนอื่นๆ', amount:Number(recipe.otherCost)}] : []);
+  const otherCost = otherCostItems.reduce((s,x)=>s+(Number(x.amount)||0),0);
+  // ถ้ามีบรรทัดที่คำนวณไม่ได้ ยอดรวมถือว่ายังไม่สมบูรณ์ (ไม่รวมต้นทุนของบรรทัดนั้น) และต้องแจ้งเตือนผู้ใช้เสมอ
+  const total = ingredientCost + otherCost;
+  return {lines, ingredientCost, otherCost, otherCostItems, total, hasUnitError};
+}
+
+function computeSaleFigures(recipeId, qty, platformId, promotionId, sellingPrice){
+  const recipe = recipeById(recipeId);
+  const platform = platformById(platformId);
+  const promo = promotionId ? promoById(promotionId) : null;
+  const rc = recipe ? computeRecipeCost(recipe) : {total:0};
+  const foodCostUnit = rc.total;
+  const foodCostTotal = foodCostUnit*qty;
+  const gross = sellingPrice*qty;
+  const platformFeeAmt = platform ? gross*(Number(platform.feePercent)||0)/100 : 0;
+  const paymentFeeAmt = platform ? gross*(Number(platform.paymentFeePercent)||0)/100 : 0;
+  const otherFeeAmt = platform ? (Number(platform.otherFee)||0) : 0;
+  let promoDiscountTotal = 0, promoStoreShare = 0;
+  if(promo){
+    const unitDiscount = promo.type==='percent' ? sellingPrice*(Number(promo.value)||0)/100 : (Number(promo.value)||0);
+    promoDiscountTotal = unitDiscount*qty;
+    if(promo.responsibility==='store') promoStoreShare = promoDiscountTotal;
+    else if(promo.responsibility==='platform') promoStoreShare = 0;
+    else promoStoreShare = promoDiscountTotal*((Number(promo.splitStorePercent)||0)/100);
+  }
+  const netRevenue = gross - platformFeeAmt - paymentFeeAmt - otherFeeAmt - promoStoreShare;
+  const actualProfit = netRevenue - foodCostTotal;
+  const profitMargin = gross>0 ? (actualProfit/gross*100) : 0;
+  return {recipe, platform, promo, foodCostUnit, foodCostTotal, gross, platformFeeAmt, paymentFeeAmt, otherFeeAmt,
+           promoDiscountTotal, promoStoreShare, netRevenue, actualProfit, profitMargin};
+}
+
+function checkSaleStock(recipeId, qty, excludeRef){
+  // ---- ตรวจสอบก่อนบันทึกจริง: ห้ามคำนวณ/ตัด stock ถ้าหน่วยไม่ตรง และห้าม stock ติดลบ ----
+  // excludeRef: ถ้าระบุ จะไม่นับ stock movement ของ sale นี้ (ใช้ตอนแก้ไขรายการขายเดิม)
+  const recipe = recipeById(recipeId);
+  if(!recipe) return {success:true, recipe:null};
+
+  const usage = []; // {ingr, totalUse}
+  for(const item of recipe.items){
+    const ingr = ingrById(item.ingredientId);
+    if(!ingr){
+      return {success:false, error:`ไม่สามารถบันทึกการขายได้: พบวัตถุดิบที่ถูกลบไปแล้วในสูตร "${recipe.name}"`};
+    }
+    const converted = convertQty(item.qty, item.unit, ingr.unit);
+    if(converted===null){
+      return {success:false, error:`ไม่สามารถบันทึกการขายได้: หน่วย "${item.unit}" ของ "${ingr.name}" ในสูตรแปลงเป็นหน่วยสต๊อก "${ingr.unit}" ไม่ได้ กรุณาแก้ไขหน่วยในสูตรก่อน`};
+    }
+    const totalUse = converted*qty;
+    usage.push({ingr, totalUse});
+  }
+  // รวมยอดใช้ต่อวัตถุดิบ (เผื่อวัตถุดิบซ้ำกันหลายบรรทัดในสูตรเดียว) แล้วเช็ค stock พร้อมกันทั้งหมดก่อนตัดจริง
+  const usageByIngr = {};
+  usage.forEach(u=>{ usageByIngr[u.ingr.id] = (usageByIngr[u.ingr.id]||0) + u.totalUse; });
+  for(const ingrId in usageByIngr){
+    const ingr = ingrById(ingrId);
+    let currentStock = getStock(ingrId);
+    if(excludeRef){
+      // เอา stock movement เดิมของรายการขายที่กำลังแก้ไขออกก่อน (คืนของเดิมกลับมาชั่วคราวเพื่อคำนวณ)
+      const excluded = DB.stockMovements.filter(m=>m.ref===excludeRef && m.ingredientId===ingrId).reduce((s,m)=>s+m.qty,0);
+      currentStock -= excluded;
+    }
+    const remaining = currentStock - usageByIngr[ingrId];
+    if(remaining < -1e-9){
+      return {success:false, error:`Stock "${ingr.name}" ไม่พอสำหรับการขายนี้ (มี ${fmtNum(currentStock,2)} ${ingr.unit}, ต้องใช้ ${fmtNum(usageByIngr[ingrId],2)} ${ingr.unit})`};
+    }
+  }
+  return {success:true, recipe};
+}
+
+function recordSale(recipeId, qty, platformId, promotionId, sellingPrice, date, doSave){
+  const check = checkSaleStock(recipeId, qty);
+  if(!check.success) return check;
+  const recipe = check.recipe;
+
+  const f = computeSaleFigures(recipeId, qty, platformId, promotionId, sellingPrice);
+  const sale = {
+    id:uid(), date: date||todayStr(), recipeId, qty, platformId, promotionId: promotionId||null, sellingPrice,
+    foodCostUnit:f.foodCostUnit, foodCostTotal:f.foodCostTotal, gross:f.gross,
+    platformFeeAmt:f.platformFeeAmt, paymentFeeAmt:f.paymentFeeAmt, otherFeeAmt:f.otherFeeAmt,
+    promoDiscountTotal:f.promoDiscountTotal, promoStoreShare:f.promoStoreShare,
+    netRevenue:f.netRevenue, actualProfit:f.actualProfit, profitMargin:f.profitMargin
+  };
+  DB.sales.push(sale);
+  // deduct stock (ผ่านการตรวจสอบแล้วด้านบนว่าหน่วยตรงกันและ stock พอ)
+  if(recipe){
+    recipe.items.forEach(item=>{
+      const ingr = ingrById(item.ingredientId);
+      if(!ingr) return;
+      const converted = convertQty(item.qty, item.unit, ingr.unit);
+      const totalUse = converted*qty;
+      addStockMovement(ingr.id, 'out', -totalUse, `ขาย: ${recipe.name} x${qty}`, sale.id, sale.date);
+    });
+  }
+  if(doSave!==false){ save('sales'); }
+  return {success:true, sale};
+}
+
+function updateSale(id, recipeId, qty, platformId, promotionId, sellingPrice, date){
+  const old = DB.sales.find(s=>s.id===id);
+  if(!old) return {success:false, error:'ไม่พบรายการขายนี้'};
+
+  const check = checkSaleStock(recipeId, qty, id);
+  if(!check.success) return check;
+  const recipe = check.recipe;
+
+  const f = computeSaleFigures(recipeId, qty, platformId, promotionId, sellingPrice);
+  Object.assign(old, {
+    date: date||old.date, recipeId, qty, platformId, promotionId: promotionId||null, sellingPrice,
+    foodCostUnit:f.foodCostUnit, foodCostTotal:f.foodCostTotal, gross:f.gross,
+    platformFeeAmt:f.platformFeeAmt, paymentFeeAmt:f.paymentFeeAmt, otherFeeAmt:f.otherFeeAmt,
+    promoDiscountTotal:f.promoDiscountTotal, promoStoreShare:f.promoStoreShare,
+    netRevenue:f.netRevenue, actualProfit:f.actualProfit, profitMargin:f.profitMargin
+  });
+  save('sales');
+
+  // ลบ stock movement เดิมของรายการขายนี้ทั้งหมด แล้วสร้างใหม่ตามสูตร/จำนวนที่แก้ไข
+  DB.stockMovements = DB.stockMovements.filter(m=>m.ref!==id);
+  if(recipe){
+    recipe.items.forEach(item=>{
+      const ingr = ingrById(item.ingredientId);
+      if(!ingr) return;
+      const converted = convertQty(item.qty, item.unit, ingr.unit);
+      const totalUse = converted*qty;
+      addStockMovement(ingr.id, 'out', -totalUse, `ขาย: ${recipe.name} x${qty} (แก้ไข)`, id, old.date);
+    });
+  } else {
+    save('stockMovements');
+  }
+  return {success:true, sale:old};
+}
+
+function deleteSale(id){
+  const s = DB.sales.find(x=>x.id===id);
+  if(!s){ return; }
+  // ลบรายการขาย = คืน stock ที่เคยตัดไป (ลบ movement 'out' ของรายการนี้) ซึ่งทำให้ stock เพิ่มขึ้นเสมอ ไม่มีทางติดลบ
+  if(!confirm('ลบประวัติการขายนี้? Stock ที่ตัดไปจากรายการนี้จะถูกคืนกลับให้ถูกต้อง')) return;
+  DB.sales = DB.sales.filter(x=>x.id!==id);
+  save('sales');
+  DB.stockMovements = DB.stockMovements.filter(m=>m.ref!==id);
+  save('stockMovements');
+  toast('ลบประวัติการขายแล้ว และคืน Stock เรียบร้อย');
+  RENDERERS.pricing();
+}
+
+/* ---------------- Modal helpers ---------------- */
+function openModal(title, bodyHtml, wide){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modalBox').classList.toggle('wide', !!wide);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('modalBody').innerHTML = '';
+}
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e=>{
+  if(e.target.id==='modalOverlay') closeModal();
+});
+
+/* ---------------- Router ---------------- */
+const RENDERERS = {};
+function showPage(pageId){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.page===pageId));
+  const pageEl = document.getElementById('page-'+pageId);
+  pageEl.classList.add('active');
+  if(RENDERERS[pageId]) RENDERERS[pageId]();
+  window.scrollTo({top:0});
+  const act=document.querySelector('.nav-item.active');
+  if(act && act.scrollIntoView) act.scrollIntoView({inline:'center',block:'nearest'});
+}
+document.getElementById('navlist').addEventListener('click', e=>{
+  const btn = e.target.closest('.nav-item');
+  if(btn) showPage(btn.dataset.page);
+});
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+/* ---------------- Dashboard: ช่วงเวลา / เช็คย้อนหลัง ---------------- */
+let dashboardPeriod = 'all'; // 'today' | '7d' | 'month' | 'year' | 'all' | 'custom'
+let dashboardCustomStart = null;
+let dashboardCustomEnd = null;
+function setDashboardPeriod(p){
+  dashboardPeriod = p;
+  RENDERERS.dashboard();
+}
+function applyDashboardCustomRange(){
+  dashboardCustomStart = document.getElementById('dashCustomStart').value || null;
+  dashboardCustomEnd = document.getElementById('dashCustomEnd').value || null;
+  dashboardPeriod = 'custom';
+  RENDERERS.dashboard();
+}
+function dashboardRangeForPeriod(){
+  const today = todayStr();
+  if(dashboardPeriod==='today') return {start:today, end:today, label:'วันนี้ ('+fmtDate(today)+')'};
+  if(dashboardPeriod==='7d'){
+    const d = new Date(today+'T00:00:00'); d.setDate(d.getDate()-6);
+    const start = d.toISOString().slice(0,10);
+    return {start, end:today, label:`${fmtDate(start)} – ${fmtDate(today)}`};
+  }
+  if(dashboardPeriod==='month'){
+    const start = today.slice(0,7)+'-01';
+    return {start, end:today, label:'เดือนนี้ ('+fmtDate(start)+' – '+fmtDate(today)+')'};
+  }
+  if(dashboardPeriod==='year'){
+    const start = today.slice(0,4)+'-01-01';
+    return {start, end:today, label:'ปีนี้ ('+fmtDate(start)+' – '+fmtDate(today)+')'};
+  }
+  if(dashboardPeriod==='custom'){
+    if(dashboardCustomStart && dashboardCustomEnd) return {start:dashboardCustomStart, end:dashboardCustomEnd, label:`${fmtDate(dashboardCustomStart)} – ${fmtDate(dashboardCustomEnd)}`};
+    if(dashboardCustomStart) return {start:dashboardCustomStart, end:null, label:`ตั้งแต่ ${fmtDate(dashboardCustomStart)}`};
+    if(dashboardCustomEnd) return {start:null, end:dashboardCustomEnd, label:`ถึง ${fmtDate(dashboardCustomEnd)}`};
+    return {start:null, end:null, label:'กำหนดเอง (ยังไม่ได้เลือกวันที่)'};
+  }
+  return {start:null, end:null, label:'ทั้งหมดทุกช่วงเวลา'};
+}
+function inDateRange(dateStr, range){
+  if(range.start && dateStr<range.start) return false;
+  if(range.end && dateStr>range.end) return false;
+  return true;
+}
+// ช่วงก่อนหน้าที่มีความยาวเท่ากัน สำหรับเทียบ % การเปลี่ยนแปลง (ใช้ได้เมื่อมีทั้ง start และ end ชัดเจน)
+function prevEquivalentRange(range){
+  if(!range.start || !range.end) return null;
+  const start = new Date(range.start+'T00:00:00');
+  const end = new Date(range.end+'T00:00:00');
+  const days = Math.round((end-start)/86400000)+1;
+  const prevEnd = new Date(start); prevEnd.setDate(prevEnd.getDate()-1);
+  const prevStart = new Date(prevEnd); prevStart.setDate(prevStart.getDate()-(days-1));
+  return {start:prevStart.toISOString().slice(0,10), end:prevEnd.toISOString().slice(0,10)};
+}
+function trendNote(curr, prev){
+  if(prev===0 || prev===null || prev===undefined) return 'ยังไม่มีข้อมูลช่วงก่อนหน้าเทียบ';
+  const pct = (curr-prev)/Math.abs(prev)*100;
+  return pct>=0 ? `▲ เพิ่มขึ้น ${fmtNum(pct,1)}% จากช่วงก่อนหน้า` : `▼ ลดลง ${fmtNum(Math.abs(pct),1)}% จากช่วงก่อนหน้า`;
+}
+
+RENDERERS.dashboard = function(){
+  const range = dashboardRangeForPeriod();
+  const prevRange = prevEquivalentRange(range);
+  const salesInRange = DB.sales.filter(s=>inDateRange(s.date, range));
+  const prevSales = prevRange ? DB.sales.filter(s=>inDateRange(s.date, prevRange)) : [];
+  const sumField = (arr,f)=>arr.reduce((s,x)=>s+x[f],0);
+
+  const ingCount = DB.ingredients.length;
+  const lowStock = DB.ingredients.filter(i=>stockStatusOf(i.id)!=='good').length;
+  const orderCount = salesInRange.reduce((s,x)=>s+x.qty,0);
+  const totalFoodCost = sumField(salesInRange,'foodCostTotal');
+  const totalSalesRevenue = sumField(salesInRange,'gross');
+  const totalPlatformFee = salesInRange.reduce((s,x)=>s+x.platformFeeAmt+x.paymentFeeAmt+x.otherFeeAmt,0);
+  const totalPromo = sumField(salesInRange,'promoStoreShare');
+  const totalProfit = sumField(salesInRange,'actualProfit');
+  const overheadDays = daysCountInRange(range);
+  const overheadTotal = totalMonthlyOverhead();
+  const overheadForRange = overheadDays!==null ? (overheadTotal/30)*overheadDays : null;
+  const netProfitAfterOverhead = overheadForRange!==null ? totalProfit - overheadForRange : null;
+
+  const prevRevenue = sumField(prevSales,'gross');
+  const prevProfit = sumField(prevSales,'actualProfit');
+
+  // best/worst margin by recipe (เฉพาะในช่วงที่เลือก)
+  const byRecipe = {};
+  salesInRange.forEach(s=>{
+    if(!byRecipe[s.recipeId]) byRecipe[s.recipeId] = {gross:0, profit:0, qty:0};
+    byRecipe[s.recipeId].gross += s.gross;
+    byRecipe[s.recipeId].profit += s.actualProfit;
+    byRecipe[s.recipeId].qty += s.qty;
+  });
+  let best=null, worst=null;
+  Object.entries(byRecipe).forEach(([rid,v])=>{
+    const margin = v.gross>0 ? v.profit/v.gross*100 : 0;
+    const r = recipeById(rid);
+    if(!r) return;
+    const rec = {name:r.name, margin, profit:v.profit};
+    if(!best || margin>best.margin) best = rec;
+    if(!worst || margin<worst.margin) worst = rec;
+  });
+
+  const lowStockRows = DB.ingredients.filter(i=>stockStatusOf(i.id)!=='good')
+    .map(i=>`<div class="mini-list-item"><span class="name">${esc(i.name)}</span>${statusBadge(stockStatusOf(i.id))}</div>`).join('')
+    || `<div class="muted" style="padding:8px 2px;">ไม่มีวัตถุดิบใกล้หมดหรือหมด</div>`;
+
+  const recentSales = [...salesInRange].sort((a,b)=> a.date<b.date?1:(a.date>b.date?-1:0)).slice(0,8).map(s=>{
+    const r = recipeById(s.recipeId); const p = platformById(s.platformId);
+    return `<tr>
+      <td>${fmtDate(s.date)}</td>
+      <td class="cell-strong">${esc(r?r.name:'-')}</td>
+      <td>${esc(p?p.name:'-')}</td>
+      <td class="num">${fmtNum(s.qty)}</td>
+      <td class="num">${fmtMoney(s.gross)}</td>
+      <td class="num" style="color:${s.actualProfit>=0?'var(--good)':'var(--danger)'};font-weight:600;">${fmtMoney(s.actualProfit)}</td>
+    </tr>`;
+  }).join('') || `<tr class="empty-row"><td colspan="6">ไม่มีข้อมูลการขายในช่วงที่เลือก</td></tr>`;
+
+  const presets = [
+    {key:'today', label:'วันนี้'},
+    {key:'7d', label:'7 วันล่าสุด'},
+    {key:'month', label:'เดือนนี้'},
+    {key:'year', label:'ปีนี้'},
+    {key:'all', label:'ทั้งหมด'},
+    {key:'custom', label:'กำหนดเอง'},
+  ];
+  const tabs = presets.map(p=>`<button class="seg-tab ${dashboardPeriod===p.key?'active':''}" onclick="setDashboardPeriod('${p.key}')">${p.label}</button>`).join('');
+  const customRangeUI = dashboardPeriod==='custom' ? `
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input type="date" id="dashCustomStart" value="${dashboardCustomStart||''}" style="border:1px solid var(--line);background:var(--surface);padding:7px 9px;border-radius:var(--radius-s);font-size:13.5px;">
+      <span style="color:var(--ink-soft);font-size:13px;">ถึง</span>
+      <input type="date" id="dashCustomEnd" value="${dashboardCustomEnd||''}" style="border:1px solid var(--line);background:var(--surface);padding:7px 9px;border-radius:var(--radius-s);font-size:13.5px;">
+      <button class="btn btn-sm btn-accent" onclick="applyDashboardCustomRange()">ใช้ช่วงนี้</button>
+    </div>` : '';
+
+  document.getElementById('page-dashboard').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="page-title">📊 Dashboard</h1><p class="page-desc">ภาพรวมร้าน — เช็คย้อนหลังได้ทุกช่วงเวลา · อัปเดตล่าสุด ${fmtDate(todayStr())}</p></div>
+    </div>
+
+    <div class="dash-toolbar">
+      <div class="seg-tabs">${tabs}</div>
+      <div class="range-label">แสดงข้อมูล: ${range.label}</div>
+    </div>
+    ${customRangeUI ? `<div style="margin:-6px 0 16px;">${customRangeUI}</div>` : ''}
+
+    <div class="cards-row">
+      <div class="stat-card" style="--accent:var(--herb)"><div class="stat-label">จำนวนวัตถุดิบ</div><div class="stat-value">${fmtNum(ingCount)}</div><div class="stat-note">รายการที่ติดตามอยู่ (ปัจจุบัน)</div></div>
+      <div class="stat-card" style="--accent:${lowStock>0?'var(--chili)':'var(--herb)'}"><div class="stat-label">Stock ใกล้หมด/หมด</div><div class="stat-value">${fmtNum(lowStock)}</div><div class="stat-note">รายการต้องสั่งซื้อเพิ่ม (ปัจจุบัน)</div></div>
+      <div class="stat-card" style="--accent:var(--turmeric)"><div class="stat-label">ยอดขายรวม</div><div class="stat-value">${fmtMoney(totalSalesRevenue)}</div><div class="stat-note">${prevRange?trendNote(totalSalesRevenue,prevRevenue):`บาท · ${orderCount} จาน`}</div></div>
+      <div class="stat-card" style="--accent:var(--turmeric)"><div class="stat-label">ต้นทุนอาหารรวม</div><div class="stat-value">${fmtMoney(totalFoodCost)}</div><div class="stat-note">บาท ในช่วงที่เลือก</div></div>
+      <div class="stat-card" style="--accent:var(--clay)"><div class="stat-label">Platform Fee รวม</div><div class="stat-value">${fmtMoney(totalPlatformFee)}</div><div class="stat-note">บาท ค่าธรรมเนียมทุกช่องทาง</div></div>
+      <div class="stat-card" style="--accent:var(--chili)"><div class="stat-label">Promotion ที่ร้านรับผิดชอบ</div><div class="stat-value">${fmtMoney(totalPromo)}</div><div class="stat-note">บาท ส่วนลดที่ร้านออก</div></div>
+      <div class="stat-card" style="--accent:var(--good)"><div class="stat-label">กำไรขั้นต้นรวม</div><div class="stat-value" style="color:${totalProfit>=0?'var(--good-deep,#3F6B3F)':'var(--danger)'}">${fmtMoney(totalProfit)}</div><div class="stat-note">${prevRange?trendNote(totalProfit,prevProfit):'บาท หลังหักต้นทุนวัตถุดิบและค่าธรรมเนียม (ยังไม่หักต้นทุนคงที่)'}</div></div>
+      <div class="stat-card" style="--accent:var(--herb-deep)"><div class="stat-label">กำไรสุทธิรวม <span style="font-weight:400;">(หลังต้นทุนคงที่)</span></div><div class="stat-value" style="color:${netProfitAfterOverhead===null?'var(--ink)':(netProfitAfterOverhead>=0?'var(--good-deep,#3F6B3F)':'var(--danger)')}">${netProfitAfterOverhead===null?'—':fmtMoney(netProfitAfterOverhead)}</div><div class="stat-note">${netProfitAfterOverhead===null?'เลือกช่วงวันที่ (ไม่ใช่ "ทั้งหมด") เพื่อคำนวณ':`หักต้นทุนคงที่ ${fmtMoney(overheadForRange)} บาท ในช่วงนี้ · ดูรายละเอียดที่หน้า "ต้นทุนคงที่"`}</div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">การขายล่าสุด <small>ในช่วงที่เลือก · สูงสุด 8 รายการ</small></div>
+        <div class="table-scroll"><table class="data-table"><thead><tr><th>วันที่</th><th>เมนู</th><th>ช่องทาง</th><th>จำนวน</th><th>ยอดขาย</th><th>กำไร</th></tr></thead>
+        <tbody>${recentSales}</tbody></table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="panel">
+          <div class="panel-title">Stock ที่ต้องเฝ้าระวัง <small>ปัจจุบัน</small></div>
+          <div class="mini-list">${lowStockRows}</div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">เมนูทำกำไร <small>ในช่วงที่เลือก</small></div>
+          <div class="mini-list">
+            <div class="mini-list-item"><span class="name">🏆 กำไรสูงสุด: ${best?esc(best.name):'-'}</span><span class="val" style="color:var(--good)">${best?fmtNum(best.margin,1)+'%':'-'}</span></div>
+            <div class="mini-list-item"><span class="name">⚠️ กำไรต่ำสุด: ${worst?esc(worst.name):'-'}</span><span class="val" style="color:var(--chili)">${worst?fmtNum(worst.margin,1)+'%':'-'}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+/* =========================================================
+   INGREDIENTS
+   ========================================================= */
+let ingFilter = {q:'', cat:''};
+let purchaseDashPeriod = 'all'; // 'day' | 'month' | 'year' | 'all'
+function setPurchaseDashPeriod(p){ purchaseDashPeriod = p; RENDERERS.purchases(); }
+function prevDayStr(dateStr){
+  const d = new Date(dateStr+'T00:00:00'); d.setDate(d.getDate()-1);
+  return d.toISOString().slice(0,10);
+}
+function prevMonthKeyOf(monthKey){
+  const [y,m] = monthKey.split('-').map(Number);
+  const d = new Date(y, m-2, 1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+function prevYearKeyOf(yearKey){ return String(Number(yearKey)-1); }
+function periodPredicate(period, dateStr){
+  const today = todayStr();
+  if(period==='day') return dateStr===today;
+  if(period==='month') return dateStr.slice(0,7)===today.slice(0,7);
+  if(period==='year') return dateStr.slice(0,4)===today.slice(0,4);
+  return true;
+}
+function prevPeriodPredicate(period, dateStr){
+  const today = todayStr();
+  if(period==='day') return dateStr===prevDayStr(today);
+  if(period==='month') return dateStr.slice(0,7)===prevMonthKeyOf(today.slice(0,7));
+  if(period==='year') return dateStr.slice(0,4)===prevYearKeyOf(today.slice(0,4));
+  return false;
+}
+RENDERERS.ingredients = function(){
+  const cats = [...new Set(DB.ingredients.map(i=>i.category).filter(Boolean))];
+  const rows = DB.ingredients
+    .filter(i => (!ingFilter.q || i.name.toLowerCase().includes(ingFilter.q.toLowerCase())) && (!ingFilter.cat || i.category===ingFilter.cat))
+    .map(i=>{
+      const stats = purchaseStats(i.id);
+      return `<tr>
+        <td class="cell-strong">${esc(i.name)}<div class="cell-sub">${esc(i.supplier||'-')}</div></td>
+        <td><span class="tag-pill">${esc(i.category||'-')}</span></td>
+        <td class="num">${esc(i.unit)}</td>
+        <td class="num">${fmtNum(i.minStock)}</td>
+        <td class="num">${i.latestPrice?fmtMoney(i.latestPrice):'-'}</td>
+        <td class="num">${i.avgPrice?fmtMoney(i.avgPrice):'-'}<div class="cell-sub">${stats.count?`ต่ำสุด ${fmtMoney(stats.min)} / สูงสุด ${fmtMoney(stats.max)}`:''}</div></td>
+        <td class="num">${statusBadge(stockStatusOf(i.id))}</td>
+        <td><div class="row-actions">
+          <button class="icon-btn" title="ประวัติราคา" onclick="openPriceHistoryModal('${i.id}')">📈</button>
+          <button class="icon-btn" title="แก้ไข" onclick="openIngredientModal('${i.id}')">✏️</button>
+          <button class="icon-btn" title="ลบ" onclick="deleteIngredient('${i.id}')">🗑️</button>
+        </div></td>
+      </tr>`;
+    }).join('') || `<tr class="empty-row"><td colspan="8">ไม่พบวัตถุดิบ ลองเพิ่มรายการใหม่</td></tr>`;
+
+  document.getElementById('page-ingredients').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="page-title">🥬 วัตถุดิบ</h1><p class="page-desc">รายการวัตถุดิบทั้งหมดของร้าน (ไม่รวมยอด Stock)</p></div>
+      <div class="page-actions"><button class="btn btn-accent" onclick="openIngredientModal()">+ เพิ่มวัตถุดิบ</button></div>
+    </div>
+    <div class="panel">
+      <div class="toolbar">
+        <div class="search-box"><span class="ic">🔎</span><input id="ingSearch" placeholder="ค้นหาวัตถุดิบ..." value="${esc(ingFilter.q)}"></div>
+        <select class="filter-select" id="ingCatFilter">
+          <option value="">ทุกหมวดหมู่</option>
+          ${cats.map(c=>`<option value="${esc(c)}" ${ingFilter.cat===c?'selected':''}>${esc(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="table-scroll"><table class="data-table">
+        <thead><tr><th>วัตถุดิบ</th><th>หมวดหมู่</th><th>หน่วย</th><th>Min Stock</th><th>ราคาล่าสุด</th><th>ราคาเฉลี่ย</th><th>สถานะ Stock</th><th>จัดการ</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>
+  `;
+  document.getElementById('ingSearch').addEventListener('input', e=>{ ingFilter.q=e.target.value; RENDERERS.ingredients(); });
+  document.getElementById('ingCatFilter').addEventListener('change', e=>{ ingFilter.cat=e.target.value; RENDERERS.ingredients(); });
+};
+
+function openIngredientModal(id){
+  const item = id ? ingrById(id) : null;
+  openModal(item?'แก้ไขวัตถุดิบ':'เพิ่มวัตถุดิบใหม่', `
+    <div class="form-grid">
+      <div class="field span-2"><label>ชื่อวัตถุดิบ</label><input id="f_name" value="${item?esc(item.name):''}" placeholder="เช่น กะเพรา"></div>
+      <div class="field"><label>หมวดหมู่</label><input id="f_category" value="${item?esc(item.category):''}" placeholder="เช่น ผัก/สมุนไพร"></div>
+      <div class="field"><label>หน่วยมาตรฐาน</label><input id="f_unit" list="unitList" value="${item?esc(item.unit):''}" placeholder="เช่น kg"></div>
+      <div class="field"><label>Supplier</label><input id="f_supplier" value="${item?esc(item.supplier):''}" placeholder="ผู้จำหน่าย"></div>
+      <div class="field"><label>Minimum Stock</label><input id="f_minstock" type="number" step="0.01" value="${item?item.minStock:0}"></div>
+    </div>
+    ${unitDatalist()}
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveIngredient('${item?item.id:''}')">บันทึก</button>
+    </div>
+  `);
+}
+function saveIngredient(id){
+  const name = document.getElementById('f_name').value.trim();
+  const unit = document.getElementById('f_unit').value.trim();
+  if(!name || !unit){ toast('กรุณากรอกชื่อและหน่วยมาตรฐาน'); return; }
+  const data = {
+    name, category: document.getElementById('f_category').value.trim(),
+    unit, supplier: document.getElementById('f_supplier').value.trim(),
+    minStock: Number(document.getElementById('f_minstock').value)||0
+  };
+  if(id){
+    const item = ingrById(id);
+    Object.assign(item, data);
+  } else {
+    DB.ingredients.push({id:uid(), latestPrice:0, avgPrice:0, ...data});
+  }
+  save('ingredients');
+  closeModal();
+  toast('บันทึกวัตถุดิบแล้ว');
+  RENDERERS.ingredients();
+}
+function deleteIngredient(id){
+  if(!confirm('ลบวัตถุดิบนี้? ประวัติการซื้อและ Stock ที่เกี่ยวข้องจะยังคงอยู่แต่จะอ้างอิงไม่ได้')) return;
+  DB.ingredients = DB.ingredients.filter(i=>i.id!==id);
+  save('ingredients');
+  toast('ลบวัตถุดิบแล้ว');
+  RENDERERS.ingredients();
+}
+function openPriceHistoryModal(id){
+  const ingr = ingrById(id);
+  if(!ingr){ toast('ไม่พบวัตถุดิบนี้'); return; }
+  const list = DB.purchases.filter(p=>p.ingredientId===id).sort((a,b)=> a.date<b.date?-1:1);
+  if(list.length===0){
+    openModal(`📈 ประวัติราคา: ${esc(ingr.name)}`, `<div class="empty-row" style="text-align:center;padding:24px;color:var(--ink-faint);">ยังไม่มีประวัติการซื้อของวัตถุดิบนี้</div>`);
+    return;
+  }
+  const prices = list.map(p=>p.pricePerUnit);
+  const maxPrice = Math.max(...prices);
+  const minPrice = Math.min(...prices);
+  const avgPrice = prices.reduce((s,p)=>s+p,0)/prices.length;
+  const first = list[0], last = list[list.length-1];
+  const changePct = first.pricePerUnit>0 ? ((last.pricePerUnit-first.pricePerUnit)/first.pricePerUnit*100) : 0;
+  const bars = list.map(p=>`
+    <div class="bar-item">
+      <div class="bar-item-top"><span class="name">${fmtDate(p.date)}</span><span class="val">${fmtMoney(p.pricePerUnit)} / ${esc(ingr.unit)}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${maxPrice?(p.pricePerUnit/maxPrice*100):0}%"></div></div>
+    </div>`).join('');
+  const rows = [...list].reverse().map(p=>`<tr>
+      <td>${fmtDate(p.date)}</td>
+      <td class="num">${fmtNum(p.qty)} ${esc(ingr.unit)}</td>
+      <td class="num">${fmtMoney(p.price)}</td>
+      <td class="num">${fmtMoney(p.pricePerUnit)}</td>
+    </tr>`).join('');
+  openModal(`📈 ประวัติราคา: ${esc(ingr.name)}`, `
+    <div class="cards-row">
+      <div class="stat-card" style="--accent:var(--turmeric)"><div class="stat-label">ราคาล่าสุด</div><div class="stat-value" style="font-size:19px;">${fmtMoney(ingr.latestPrice)}</div><div class="stat-note">ต่อ ${esc(ingr.unit)}</div></div>
+      <div class="stat-card" style="--accent:var(--herb)"><div class="stat-label">ราคาเฉลี่ย</div><div class="stat-value" style="font-size:19px;">${fmtMoney(avgPrice)}</div><div class="stat-note">ต่อ ${esc(ingr.unit)}</div></div>
+      <div class="stat-card" style="--accent:var(--clay)"><div class="stat-label">ต่ำสุด / สูงสุด</div><div class="stat-value" style="font-size:16px;">${fmtMoney(minPrice)} / ${fmtMoney(maxPrice)}</div><div class="stat-note">จากประวัติทั้งหมด</div></div>
+      <div class="stat-card" style="--accent:${changePct>=0?'var(--chili)':'var(--good)'}"><div class="stat-label">เปลี่ยนแปลง</div><div class="stat-value" style="font-size:19px;">${changePct>=0?'▲':'▼'} ${fmtNum(Math.abs(changePct),1)}%</div><div class="stat-note">จากครั้งแรกถึงล่าสุด</div></div>
+    </div>
+    <div class="panel-title" style="margin-top:6px;">แนวโน้มราคาต่อหน่วย <small>เรียงตามวันที่ซื้อ</small></div>
+    ${bars}
+    <div class="panel-title" style="margin-top:18px;">ประวัติการซื้อทั้งหมด <small>${fmtNum(list.length)} รายการ</small></div>
+    <div class="table-scroll"><table class="data-table">
+      <thead><tr><th>วันที่</th><th>จำนวน</th><th>ราคารวม</th><th>ราคาต่อหน่วย</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  `, true);
+}
+
+/* =========================================================
+   PURCHASES
+   ========================================================= */
+let purchaseFilter = {q:'', cat:''};
+let saleFilter = {q:'', platformId:'', dateFrom:'', dateTo:''};
+RENDERERS.purchases = function(){
+  const sorted = [...DB.purchases].sort((a,b)=> a.date<b.date?1:-1);
+  const purchaseCats = [...new Set(DB.ingredients.map(i=>i.category).filter(Boolean))];
+  const filtered = sorted.filter(p=>{
+    const ingr = ingrById(p.ingredientId);
+    if(purchaseFilter.cat && (!ingr || ingr.category!==purchaseFilter.cat)) return false;
+    if(purchaseFilter.q){
+      const q = purchaseFilter.q.toLowerCase();
+      const hay = `${ingr?ingr.name:''} ${p.note||''}`.toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const rows = filtered.map(p=>{
+    const ingr = ingrById(p.ingredientId);
+    return `<tr>
+      <td>${fmtDate(p.date)}</td>
+      <td class="cell-strong">${ingr?esc(ingr.name):'(ลบแล้ว)'}</td>
+      <td class="num">${fmtNum(p.qty)} ${ingr?esc(ingr.unit):''}</td>
+      <td class="num">${fmtMoney(p.price)}</td>
+      <td class="num">${fmtMoney(p.pricePerUnit)}</td>
+      <td>${esc(p.note||'-')}</td>
+      <td><div class="row-actions">
+        <button class="icon-btn" title="แก้ไข" onclick="openPurchaseModal('${p.id}')">✏️</button>
+        <button class="icon-btn" title="ลบ" onclick="deletePurchase('${p.id}')">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('') || `<tr class="empty-row"><td colspan="7">${sorted.length===0?'ยังไม่มีประวัติการซื้อ':'ไม่พบรายการที่ตรงกับการค้นหา/ตัวกรอง'}</td></tr>`;
+
+  const summary = DB.ingredients.map(i=>{
+    const stats = purchaseStats(i.id);
+    if(stats.count===0) return '';
+    return `<div class="mini-list-item">
+      <span class="name">${esc(i.name)}</span>
+      <span class="val" style="font-size:12.8px;font-weight:500;">ล่าสุด ${fmtMoney(i.latestPrice)} · เฉลี่ย ${fmtMoney(i.avgPrice)} · ต่ำสุด ${fmtMoney(stats.min)} · สูงสุด ${fmtMoney(stats.max)} / ${esc(i.unit)}</span>
+    </div>`;
+  }).filter(Boolean).join('') || `<div class="muted" style="padding:6px 2px;">ยังไม่มีข้อมูลราคา</div>`;
+
+  /* ---- purchase dashboard stats (period-aware) ---- */
+  const period = purchaseDashPeriod;
+  const periodLabels = {day:'วันนี้', month:'เดือนนี้', year:'ปีนี้', all:'ทั้งหมด'};
+  const periodPurchases = DB.purchases.filter(p=>periodPredicate(period, p.date));
+  const prevPeriodPurchases = period==='all' ? [] : DB.purchases.filter(p=>prevPeriodPredicate(period, p.date));
+
+  const totalCount = periodPurchases.length;
+  const totalSpend = periodPurchases.reduce((s,p)=>s+p.price,0);
+  const prevSpend = prevPeriodPurchases.reduce((s,p)=>s+p.price,0);
+  const diffPct = prevSpend>0 ? ((totalSpend-prevSpend)/prevSpend*100) : null;
+  const avgPurchase = totalCount>0 ? totalSpend/totalCount : 0;
+  const lastPurchase = sorted[0];
+  const distinctIngredientsInPeriod = new Set(periodPurchases.map(p=>p.ingredientId)).size;
+
+  const spendByIngredient = {};
+  periodPurchases.forEach(p=>{
+    spendByIngredient[p.ingredientId] = (spendByIngredient[p.ingredientId]||0) + p.price;
+  });
+  const topIngredients = Object.entries(spendByIngredient)
+    .map(([id,spend])=>({id, spend, ingr: ingrById(id)}))
+    .filter(x=>x.ingr)
+    .sort((a,b)=>b.spend-a.spend)
+    .slice(0,5);
+  const maxIngredientSpend = topIngredients.length ? topIngredients[0].spend : 0;
+
+  const spendByCategory = {};
+  periodPurchases.forEach(p=>{
+    const ingr = ingrById(p.ingredientId);
+    const cat = (ingr && ingr.category) ? ingr.category : 'ไม่ระบุหมวดหมู่';
+    spendByCategory[cat] = (spendByCategory[cat]||0) + p.price;
+  });
+  const topCategories = Object.entries(spendByCategory).map(([cat,spend])=>({cat,spend})).sort((a,b)=>b.spend-a.spend);
+  const maxCategorySpend = topCategories.length ? topCategories[0].spend : 0;
+
+  const ingredientBars = topIngredients.map(x=>`
+    <div class="bar-item">
+      <div class="bar-item-top"><span class="name">${esc(x.ingr.name)}</span><span class="val">${fmtMoney(x.spend)}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${maxIngredientSpend?(x.spend/maxIngredientSpend*100):0}%"></div></div>
+    </div>`).join('') || `<div class="muted" style="padding:6px 2px;">ไม่มีข้อมูลการซื้อในช่วง${periodLabels[period]}</div>`;
+
+  const categoryBars = topCategories.map(x=>`
+    <div class="bar-item">
+      <div class="bar-item-top"><span class="name">${esc(x.cat)}</span><span class="val">${fmtMoney(x.spend)}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${maxCategorySpend?(x.spend/maxCategorySpend*100):0}%"></div></div>
+    </div>`).join('') || `<div class="muted" style="padding:6px 2px;">ไม่มีข้อมูลการซื้อในช่วง${periodLabels[period]}</div>`;
+
+  const tabs = ['day','month','year','all'].map(p=>
+    `<button class="seg-tab ${period===p?'active':''}" onclick="setPurchaseDashPeriod('${p}')">${periodLabels[p]}</button>`
+  ).join('');
+
+  const thirdCard = period==='all'
+    ? `<div class="stat-card" style="--accent:var(--chili)"><div class="stat-label">วัตถุดิบที่เคยซื้อ</div><div class="stat-value">${fmtNum(distinctIngredientsInPeriod)}</div><div class="stat-note">ชนิดวัตถุดิบที่มีประวัติการซื้อ</div></div>`
+    : `<div class="stat-card" style="--accent:var(--chili)"><div class="stat-label">ยอดซื้อ${periodLabels[period]}</div><div class="stat-value">${fmtMoney(totalSpend)}</div><div class="stat-note">${diffPct===null?`ยังไม่มีข้อมูลช่วงก่อนหน้าเทียบ`:(diffPct>=0?`▲ เพิ่มขึ้น ${fmtNum(diffPct,1)}% จากช่วงก่อนหน้า`:`▼ ลดลง ${fmtNum(Math.abs(diffPct),1)}% จากช่วงก่อนหน้า`)}</div></div>`;
+
+  document.getElementById('page-purchases').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="page-title">🛒 การซื้อ</h1><p class="page-desc">บันทึกประวัติการซื้อวัตถุดิบทุกครั้ง เพื่อคำนวณราคาล่าสุดและราคาเฉลี่ย</p></div>
+      <div class="page-actions"><button class="btn btn-accent" onclick="openPurchaseModal()">+ บันทึกการซื้อ</button></div>
+    </div>
+
+    <div class="dash-toolbar">
+      <div class="seg-tabs">${tabs}</div>
+      <div class="range-label">แสดงข้อมูลสรุป: ${periodLabels[period]}</div>
+    </div>
+
+    <div class="cards-row">
+      <div class="stat-card" style="--accent:var(--turmeric)"><div class="stat-label">จำนวนรายการซื้อ</div><div class="stat-value">${fmtNum(totalCount)}</div><div class="stat-note">${lastPurchase?`ซื้อล่าสุด ${fmtDate(lastPurchase.date)}`:'ยังไม่มีรายการ'}</div></div>
+      <div class="stat-card" style="--accent:var(--clay)"><div class="stat-label">ยอดซื้อรวม (${periodLabels[period]})</div><div class="stat-value">${fmtMoney(totalSpend)}</div><div class="stat-note">บาท ทุกวัตถุดิบรวมกัน</div></div>
+      ${thirdCard}
+      <div class="stat-card" style="--accent:var(--herb)"><div class="stat-label">ราคาเฉลี่ยต่อรายการซื้อ</div><div class="stat-value">${fmtMoney(avgPurchase)}</div><div class="stat-note">บาท ต่อการซื้อ 1 ครั้ง</div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">ซื้อมากที่สุด (ตามยอดใช้จ่าย) <small>Top 5 วัตถุดิบ · ${periodLabels[period]}</small></div>
+        ${ingredientBars}
+      </div>
+      <div class="panel">
+        <div class="panel-title">ยอดซื้อตามหมวดหมู่ <small>${periodLabels[period]}</small></div>
+        ${categoryBars}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">สรุปราคาต่อวัตถุดิบ <small>จากประวัติการซื้อทั้งหมด</small></div>
+      <div class="mini-list">${summary}</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">ประวัติการซื้อ <small>${filtered.length!==sorted.length?`พบ ${fmtNum(filtered.length)} จากทั้งหมด ${fmtNum(sorted.length)} รายการ`:`ทั้งหมด ${fmtNum(sorted.length)} รายการ`}</small></div>
+      <div class="toolbar">
+        <div class="search-box"><span class="ic">🔎</span><input id="purchaseSearch" placeholder="ค้นหาชื่อวัตถุดิบ หรือหมายเหตุ..." value="${esc(purchaseFilter.q)}"></div>
+        <select class="filter-select" id="purchaseCatFilter">
+          <option value="">ทุกหมวดหมู่</option>
+          ${purchaseCats.map(c=>`<option value="${esc(c)}" ${purchaseFilter.cat===c?'selected':''}>${esc(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="table-scroll"><table class="data-table">
+        <thead><tr><th>วันที่</th><th>วัตถุดิบ</th><th>จำนวน</th><th>ราคารวม</th><th>ราคาต่อหน่วย</th><th>หมายเหตุ</th><th>จัดการ</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>
+  `;
+  document.getElementById('purchaseSearch').addEventListener('input', e=>{ purchaseFilter.q=e.target.value; RENDERERS.purchases(); });
+  document.getElementById('purchaseCatFilter').addEventListener('change', e=>{ purchaseFilter.cat=e.target.value; RENDERERS.purchases(); });
+};
+function openPurchaseModal(id){
+  if(DB.ingredients.length===0){ toast('กรุณาเพิ่มวัตถุดิบก่อน'); return; }
+  const p = id ? DB.purchases.find(x=>x.id===id) : null;
+  openModal(p?'แก้ไขรายการซื้อ':'บันทึกการซื้อวัตถุดิบ', `
+    <div class="form-grid">
+      <div class="field span-2"><label>วัตถุดิบ</label>
+        <select id="f_ingredient">${DB.ingredients.map(i=>`<option value="${i.id}" ${p&&p.ingredientId===i.id?'selected':''}>${esc(i.name)} (${esc(i.unit)})</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>วันที่ซื้อ</label><input id="f_date" type="date" value="${p?p.date:todayStr()}"></div>
+      <div class="field"><label>จำนวน (หน่วยมาตรฐาน)</label><input id="f_qty" type="number" step="0.01" placeholder="เช่น 1" value="${p?p.qty:''}"></div>
+      <div class="field"><label>ราคารวม (บาท)</label><input id="f_price" type="number" step="0.01" placeholder="เช่น 80" value="${p?p.price:''}"></div>
+      <div class="field"><label>ราคาต่อหน่วย</label><input id="f_ppu" disabled placeholder="คำนวณอัตโนมัติ" value="${p?fmtMoney(p.pricePerUnit):''}"></div>
+      <div class="field span-2"><label>หมายเหตุ</label><input id="f_note" placeholder="ไม่บังคับ" value="${p?esc(p.note||''):''}"></div>
+    </div>
+    ${p?`<div class="hint" style="margin-top:2px;color:var(--ink-faint);font-size:12px;">💡 การแก้ไขจะปรับ Stock ให้ถูกต้องอัตโนมัติ (ระบบจะไม่ยอมบันทึกถ้าทำให้ Stock ติดลบ)</div>`:''}
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="savePurchase('${p?p.id:''}')">${p?'บันทึกการแก้ไข':'บันทึกการซื้อ'}</button>
+    </div>
+  `);
+  const upd = ()=>{
+    const q = Number(document.getElementById('f_qty').value)||0;
+    const pr = Number(document.getElementById('f_price').value)||0;
+    document.getElementById('f_ppu').value = q>0 ? fmtMoney(pr/q) : '';
+  };
+  document.getElementById('f_qty').addEventListener('input', upd);
+  document.getElementById('f_price').addEventListener('input', upd);
+}
+function savePurchase(id){
+  const ingredientId = document.getElementById('f_ingredient').value;
+  const date = document.getElementById('f_date').value || todayStr();
+  const qty = Number(document.getElementById('f_qty').value);
+  const price = Number(document.getElementById('f_price').value);
+  const note = document.getElementById('f_note').value.trim();
+  if(!qty || qty<=0 || !price || price<=0){ toast('กรุณากรอกจำนวนและราคาให้ถูกต้อง'); return; }
+
+  if(id){
+    /* ---------- โหมดแก้ไข: ต้องปรับ Stock ให้ถูกต้อง และห้ามทำให้ Stock ติดลบ ---------- */
+    const old = DB.purchases.find(x=>x.id===id);
+    if(!old){ toast('ไม่พบรายการซื้อนี้'); return; }
+    const oldIngredientId = old.ingredientId;
+
+    if(oldIngredientId===ingredientId){
+      // วัตถุดิบเดิม: ตรวจว่าถ้าเปลี่ยนจำนวนซื้อ (เอาของเก่าออก ใส่ของใหม่เข้า) แล้ว stock จะติดลบไหม
+      const currentStock = getStock(oldIngredientId);
+      const stockAfterChange = currentStock - old.qty + qty;
+      if(stockAfterChange < -1e-9){
+        const ingr = ingrById(oldIngredientId);
+        toast(`ไม่สามารถบันทึกได้: การแก้ไขนี้จะทำให้ Stock ของ "${ingr?ingr.name:''}" ติดลบ (${fmtNum(stockAfterChange,2)} ${ingr?ingr.unit:''})`);
+        return;
+      }
+    } else {
+      // เปลี่ยนวัตถุดิบ: ต้องเอาของเดิมออกจากวัตถุดิบเก่า (ห้ามติดลบ) แล้วเพิ่มของใหม่เข้าวัตถุดิบใหม่
+      const oldStockAfterRemove = getStock(oldIngredientId) - old.qty;
+      if(oldStockAfterRemove < -1e-9){
+        const ingr = ingrById(oldIngredientId);
+        toast(`ไม่สามารถบันทึกได้: การย้ายรายการนี้ไปวัตถุดิบอื่นจะทำให้ Stock ของ "${ingr?ingr.name:''}" ติดลบ (${fmtNum(oldStockAfterRemove,2)} ${ingr?ingr.unit:''})`);
+        return;
+      }
+    }
+
+    Object.assign(old, {ingredientId, date, qty, price, pricePerUnit: price/qty, note});
+    save('purchases');
+    // ลบ stock movement เดิมของรายการซื้อนี้ แล้วสร้างใหม่ตามค่าที่แก้ไข
+    DB.stockMovements = DB.stockMovements.filter(m=>m.ref!==id);
+    addStockMovement(ingredientId, 'in', qty, 'รับเข้าจากการซื้อ (แก้ไข)', id, date);
+    recomputeIngredientPricing(oldIngredientId);
+    if(oldIngredientId!==ingredientId) recomputeIngredientPricing(ingredientId);
+    closeModal();
+    toast('แก้ไขรายการซื้อแล้ว และปรับ Stock ให้ถูกต้อง');
+    RENDERERS.purchases();
+    return;
+  }
+
+  const p = {id:uid(), ingredientId, date, qty, price, pricePerUnit: price/qty, note};
+  DB.purchases.push(p);
+  save('purchases');
+  addStockMovement(ingredientId, 'in', qty, 'รับเข้าจากการซื้อ', p.id, date);
+  recomputeIngredientPricing(ingredientId);
+  closeModal();
+  toast('บันทึกการซื้อแล้ว และเพิ่ม Stock อัตโนมัติ');
+  RENDERERS.purchases();
+};
+function deletePurchase(id){
+  const p = DB.purchases.find(x=>x.id===id);
+  if(!p){ return; }
+  const ingr = ingrById(p.ingredientId);
+  // ลบ purchase = ย้อน stock (เอา movement 'in' ของรายการนี้ออก) ต้องเช็คก่อนว่าจะไม่ทำให้ stock ปัจจุบันติดลบ
+  // เช่น ถ้าของล็อตนี้ถูกขาย/เบิกไปใช้แล้วบางส่วน stock คงเหลือปัจจุบันอาจน้อยกว่า qty ที่จะถูกย้อน
+  const currentStock = getStock(p.ingredientId);
+  const stockAfterUndo = currentStock - p.qty;
+  if(stockAfterUndo < -1e-9){
+    toast(`ไม่สามารถลบได้: การย้อน Stock ของ "${ingr?ingr.name:''}" จากรายการนี้จะทำให้ Stock ติดลบ (${fmtNum(stockAfterUndo,2)} ${ingr?ingr.unit:''}) เพราะวัตถุดิบล็อตนี้ถูกใช้ไปแล้วบางส่วน`);
+    return;
+  }
+  if(!confirm('ลบประวัติการซื้อนี้? Stock ที่เพิ่มจากรายการนี้จะถูกปรับกลับด้วย')) return;
+  DB.purchases = DB.purchases.filter(x=>x.id!==id);
+  save('purchases');
+  DB.stockMovements = DB.stockMovements.filter(m=>m.ref!==id);
+  save('stockMovements');
+  recomputeIngredientPricing(p.ingredientId);
+  toast('ลบประวัติการซื้อแล้ว และย้อน Stock เรียบร้อย');
+  RENDERERS.purchases();
+}
+
+/* =========================================================
+   STOCK
+   ========================================================= */
+let stockFilter = {q:''};
+RENDERERS.stock = function(){
+  const sortedIngr = [...DB.ingredients];
+  const filteredIngr = sortedIngr.filter(i=>{
+    if(!stockFilter.q) return true;
+    const q = stockFilter.q.toLowerCase();
+    const hay = `${i.name} ${i.category||''}`.toLowerCase();
+    return hay.includes(q);
+  });
+  const rows = filteredIngr.map(i=>{
+    const stock = getStock(i.id);
+    return `<tr>
+      <td class="cell-strong">${esc(i.name)}<div class="cell-sub">${esc(i.category||'-')}</div></td>
+      <td class="num">${fmtNum(stock,2)} ${esc(i.unit)}</td>
+      <td class="num">${fmtNum(i.minStock,2)} ${esc(i.unit)}</td>
+      <td class="num">${statusBadge(stockStatusOf(i.id))}</td>
+      <td><div class="row-actions">
+        <button class="btn btn-sm" onclick="openStockMoveModal('${i.id}','in')">รับเข้า</button>
+        <button class="btn btn-sm" onclick="openStockMoveModal('${i.id}','out')">เบิกออก</button>
+        <button class="btn btn-sm" onclick="openStockMoveModal('${i.id}','adjust')">ปรับยอด</button>
+      </div></td>
+    </tr>`;
+  }).join('') || `<tr class="empty-row"><td colspan="5">${sortedIngr.length===0?'ยังไม่มีวัตถุดิบ':'ไม่พบวัตถุดิบที่ตรงกับการค้นหา'}</td></tr>`;
+
+  const moves = [...DB.stockMovements].sort((a,b)=> a.date<b.date?1:-1).slice(0,40).map(m=>{
+    const ingr = ingrById(m.ingredientId);
+    const typeLabel = {in:'รับเข้า',out:'เบิกออก',adjust:'ปรับยอด'}[m.type]||m.type;
+    return `<tr>
+      <td>${fmtDate(m.date)}</td>
+      <td class="cell-strong">${ingr?esc(ingr.name):'(ลบแล้ว)'}</td>
+      <td><span class="tag-pill">${typeLabel}</span></td>
+      <td class="num" style="color:${m.qty>=0?'var(--good)':'var(--danger)'};font-weight:600;">${m.qty>=0?'+':''}${fmtNum(m.qty,2)}</td>
+      <td>${esc(m.note||'-')}</td>
+    </tr>`;
+  }).join('') || `<tr class="empty-row"><td colspan="5">ยังไม่มีความเคลื่อนไหว Stock</td></tr>`;
+
+  document.getElementById('page-stock').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="page-title">📦 Stock</h1><p class="page-desc">ยอด Stock ปัจจุบัน คำนวณจากประวัติการเคลื่อนไหวทั้งหมด (ห้ามแก้โดยไม่มีประวัติ)</p></div>
+    </div>
+    <div class="panel">
+      <div class="toolbar">
+        <div class="search-box"><span class="ic">🔎</span><input id="stockSearch" placeholder="ค้นหาวัตถุดิบ หรือหมวดหมู่..." value="${esc(stockFilter.q)}"></div>
+      </div>
+      <div class="table-scroll"><table class="data-table">
+        <thead><tr><th>วัตถุดิบ</th><th>Stock ปัจจุบัน</th><th>Minimum Stock</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">ประวัติการเคลื่อนไหว Stock <small>ล่าสุด 40 รายการ</small></div>
+      <div class="table-scroll"><table class="data-table">
+        <thead><tr><th>วันที่</th><th>วัตถุดิบ</th><th>ประเภท</th><th>จำนวนที่เปลี่ยน</th><th>หมายเหตุ</th></tr></thead>
+        <tbody>${moves}</tbody>
+      </table></div>
+    </div>
+  `;
+  document.getElementById('stockSearch').addEventListener('input', e=>{ stockFilter.q=e.target.value; RENDERERS.stock(); });
+};
+function openStockMoveModal(ingredientId, type){
+  const ingr = ingrById(ingredientId);
+  const current = getStock(ingredientId);
+  const titleMap = {in:'บันทึกรับเข้า Stock', out:'บันทึกเบิกออก Stock', adjust:'ปรับยอด Stock (นับจริง)'};
+  openModal(titleMap[type], `
+    <div class="panel" style="margin:0 0 14px;padding:12px 14px;background:var(--surface-2);">
+      <div class="kv-line"><span>วัตถุดิบ</span><b>${esc(ingr.name)}</b></div>
+      <div class="kv-line"><span>Stock ปัจจุบัน</span><b>${fmtNum(current,2)} ${esc(ingr.unit)}</b></div>
+    </div>
+    <div class="form-grid cols-1">
+      <div class="field"><label>วันที่</label><input id="f_date" type="date" value="${todayStr()}"></div>
+      <div class="field"><label>${type==='adjust'?`นับยอดจริง (${esc(ingr.unit)})`:`จำนวน (${esc(ingr.unit)})`}</label><input id="f_qty" type="number" step="0.01" placeholder="0"></div>
+      <div class="field"><label>หมายเหตุ / เหตุผล</label><input id="f_note" placeholder="${type==='adjust'?'เช่น นับสต๊อกประจำวัน พบของเสีย':'เช่น เบิกไปใช้ทำเมนูพิเศษ'}"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveStockMove('${ingredientId}','${type}')">บันทึก</button>
+    </div>
+  `);
+}
+function saveStockMove(ingredientId, type){
+  const date = document.getElementById('f_date').value || todayStr();
+  const val = Number(document.getElementById('f_qty').value);
+  const note = document.getElementById('f_note').value.trim();
+  if(val===undefined || isNaN(val) || val<0){ toast('กรุณากรอกจำนวนเป็นตัวเลขที่ไม่ติดลบ'); return; }
+  const current = getStock(ingredientId);
+  let delta;
+  if(type==='in') delta = Math.abs(val);
+  else if(type==='out') delta = -Math.abs(val);
+  else { // adjust: val is the counted absolute stock
+    delta = val - current;
+  }
+  const resultStock = current + delta;
+  // ป้องกัน Stock ติดลบทุกกรณี (เบิกออกเกินที่มี หรือปรับยอดเป็นค่าติดลบไม่ได้อยู่แล้วเพราะเช็ค val<0 ด้านบน)
+  if(resultStock < -1e-9){
+    const ingr = ingrById(ingredientId);
+    toast(`ไม่สามารถบันทึกได้: Stock ของ "${ingr?ingr.name:''}" จะติดลบ (${fmtNum(resultStock,2)} ${ingr?ingr.unit:''}) — มีอยู่ ${fmtNum(current,2)} ${ingr?ingr.unit:''}`);
+    return;
+  }
+  if(delta===0){ toast('ไม่มีการเปลี่ยนแปลง Stock'); closeModal(); return; }
+  addStockMovement(ingredientId, type, delta, note || (type==='adjust'?'ปรับยอดจากการนับจริง':''), null, date);
+  closeModal();
+  toast('บันทึก Stock แล้ว');
+  RENDERERS.stock();
+}
+
+/* =========================================================
+   RECIPES
+   ========================================================= */
+let recipeLineCounter = 0;
+let costLineCounter = 0;
+function costLineRowHtml(item){
+  costLineCounter++;
+  const rid = 'costline_'+costLineCounter;
+  return `<div class="line-row cost-line-row" id="${rid}">
+    <input class="cl-name" placeholder="เช่น ค่าแพ็คเกจจิ้ง, ค่าแรงต่อจาน, ค่าส่ง" value="${item?esc(item.name):''}">
+    <input class="cl-amount" type="number" step="0.01" placeholder="บาท/จาน" value="${item?item.amount:''}">
+    <button class="icon-btn" onclick="document.getElementById('${rid}').remove()">✕</button>
+  </div>`;
+}
+let recipeFilter = {q:'', cat:''};
+RENDERERS.recipes = function(){
+  const recipeCats = [...new Set(DB.recipes.map(r=>r.category).filter(Boolean))];
+  const filteredRecipes = DB.recipes.filter(r=>{
+    if(recipeFilter.cat && r.category!==recipeFilter.cat) return false;
+    if(recipeFilter.q){
+      const q = recipeFilter.q.toLowerCase();
+      const hay = `${r.name} ${r.category||''}`.toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const cards = filteredRecipes.map(r=>{
+    const rc = computeRecipeCost(r);
+    return `<div class="panel" style="margin-bottom:14px;">
+      <div class="panel-title">${esc(r.name)} <small>${esc(r.category||'')}</small></div>
+      ${rc.hasUnitError ? `<div class="result-callout" style="border-color:var(--danger);margin-bottom:14px;">
+        <div class="sub" style="color:var(--danger);font-weight:600;">⚠️ คำนวณ Food Cost ไม่ได้ครบถ้วน — มีวัตถุดิบที่หน่วยไม่ตรงกัน (แปลงหน่วยไม่ได้) หรือถูกลบไปแล้ว ระบบจะไม่รวมต้นทุนของรายการนั้น กรุณาแก้ไขหน่วยในสูตรให้ตรงกับหน่วยของวัตถุดิบ</div>
+      </div>` : ''}
+      <div class="two-col">
+        <div>
+          <div class="table-scroll"><table class="data-table">
+            <thead><tr><th>วัตถุดิบ</th><th>ปริมาณ</th><th>ต้นทุน</th></tr></thead>
+            <tbody>
+              ${rc.lines.map(l=>`<tr><td>${esc(l.name)}${l.warn?` <span class="tag-pill" style="color:var(--danger);border-color:var(--danger-bg);" title="${esc(l.warnReason||'')}">⚠ ${esc(l.warnReason||'คำนวณไม่ได้')}</span>`:''}</td><td class="num">${fmtNum(l.qty,2)} ${esc(l.unit||'')}</td><td class="num">${l.warn?'<span style="color:var(--danger);">—</span>':fmtMoney(l.cost)}</td></tr>`).join('')}
+            </tbody>
+          </table></div>
+        </div>
+        <div class="calc-box">
+          <div class="calc-row"><span>ต้นทุนวัตถุดิบ${rc.hasUnitError?' (ไม่ครบ)':''}</span><span>${fmtMoney(rc.ingredientCost)}</span></div>
+          ${rc.otherCostItems.length
+            ? rc.otherCostItems.map(x=>`<div class="calc-row"><span>• ${esc(x.name)}</span><span>${fmtMoney(x.amount)}</span></div>`).join('')
+            : `<div class="calc-row"><span>ต้นทุนอื่นๆ</span><span>${fmtMoney(0)}</span></div>`}
+          <div class="calc-row total"><span>Total Food Cost</span><span style="color:${rc.hasUnitError?'var(--danger)':'var(--ink)'}">${fmtMoney(rc.total)} บาท${rc.hasUnitError?' *':''}</span></div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button class="btn btn-sm" onclick="openRecipeModal('${r.id}')">✏️ แก้ไขสูตร</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteRecipe('${r.id}')">🗑️ ลบ</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('') || `<div class="panel"><div class="empty-row" style="text-align:center;padding:30px;color:var(--ink-faint);">${DB.recipes.length===0?'ยังไม่มีสูตรอาหาร เริ่มสร้างเมนูแรกของคุณ':'ไม่พบสูตรอาหารที่ตรงกับการค้นหา/ตัวกรอง'}</div></div>`;
+
+  document.getElementById('page-recipes').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="page-title">🍳 สูตรอาหาร</h1><p class="page-desc">กำหนดวัตถุดิบต่อเมนู ระบบคำนวณ Food Cost ให้อัตโนมัติ</p></div>
+      <div class="page-actions">
+        <select class="filter-select" id="costMethodSelect">
+          <option value="latest" ${DB.settings.costMethod==='latest'?'selected':''}>คิดต้นทุนจากราคาล่าสุด</option>
+          <option value="average" ${DB.settings.costMethod==='average'?'selected':''}>คิดต้นทุนจากราคาเฉลี่ย</option>
+        </select>
+        <button class="btn btn-accent" onclick="openRecipeModal()">+ สร้างสูตรอาหาร</button>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:14px;">
+      <div class="toolbar">
+        <div class="search-box"><span class="ic">🔎</span><input id="recipeSearch" placeholder="ค้นหาชื่อเมนู..." value="${esc(recipeFilter.q)}"></div>
+        <select class="filter-select" id="recipeCatFilter">
+          <option value="">ทุกหมวดหมู่</option>
+          ${recipeCats.map(c=>`<option value="${esc(c)}" ${recipeFilter.cat===c?'selected':''}>${esc(c)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    ${cards}
+  `;
+  document.getElementById('costMethodSelect').addEventListener('change', e=>{
+    DB.settings.costMethod = e.target.value; save('settings'); toast('เปลี่ยนวิธีคำนวณต้นทุนแล้ว'); RENDERERS.recipes();
+  });
+  document.getElementById('recipeSearch').addEventListener('input', e=>{ recipeFilter.q=e.target.value; RENDERERS.recipes(); });
+  document.getElementById('recipeCatFilter').addEventListener('change', e=>{ recipeFilter.cat=e.target.value; RENDERERS.recipes(); });
+};
+
+function lineRowHtml(item){
+  recipeLineCounter++;
+  const rid = 'line_'+recipeLineCounter;
+  const ingOpts = DB.ingredients.map(i=>`<option value="${i.id}" ${item&&item.ingredientId===i.id?'selected':''}>${esc(i.name)}</option>`).join('');
+  return `<div class="line-row" id="${rid}">
+    <select class="rl-ing">${ingOpts}</select>
+    <input class="rl-qty" type="number" step="0.01" placeholder="ปริมาณ" value="${item?item.qty:''}">
+    <input class="rl-unit" list="unitList" placeholder="หน่วย" value="${item?esc(item.unit):''}">
+    <button class="icon-btn" onclick="document.getElementById('${rid}').remove()">✕</button>
+  </div>`;
+}
+function openRecipeModal(id){
+  const r = id ? recipeById(id) : null;
+  if(DB.ingredients.length===0){ toast('กรุณาเพิ่มวัตถุดิบก่อนสร้างสูตร'); return; }
+  const items = r ? r.items : [{ingredientId:DB.ingredients[0].id, qty:'', unit:DB.ingredients[0].unit}];
+  const costItems = r ? (r.otherCostItems && r.otherCostItems.length ? r.otherCostItems : (Number(r.otherCost)>0 ? [{name:'ต้นทุนอื่นๆ', amount:r.otherCost}] : [])) : [];
+  openModal(r?'แก้ไขสูตรอาหาร':'สร้างสูตรอาหารใหม่', `
+    <div class="form-grid">
+      <div class="field span-2"><label>ชื่อเมนู</label><input id="f_name" value="${r?esc(r.name):''}" placeholder="เช่น กะเพราไก่ไข่ดาว"></div>
+      <div class="field span-2"><label>หมวดหมู่เมนู</label><input id="f_category" value="${r?esc(r.category):''}" placeholder="เช่น จานเดียว"></div>
+    </div>
+    <div class="field" style="margin-top:14px;"><label>วัตถุดิบที่ใช้ในสูตร</label></div>
+    <div class="line-rows" id="lineRows">${items.map(lineRowHtml).join('')}</div>
+    <button class="btn btn-sm add-line-btn" style="margin-top:8px;" onclick="document.getElementById('lineRows').insertAdjacentHTML('beforeend', lineRowHtml())">+ เพิ่มวัตถุดิบ</button>
+    ${unitDatalist()}
+    <div class="field" style="margin-top:18px;"><label>ต้นทุนอื่นๆ ต่อจาน <span style="font-weight:400;color:var(--ink-faint);">(เช่น แพ็คเกจจิ้ง ค่าแรง ค่าส่ง)</span></label></div>
+    <div class="line-rows" id="costRows">${costItems.map(costLineRowHtml).join('')}</div>
+    <button class="btn btn-sm add-line-btn" style="margin-top:8px;" onclick="document.getElementById('costRows').insertAdjacentHTML('beforeend', costLineRowHtml())">+ เพิ่มต้นทุนอื่นๆ</button>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveRecipe('${r?r.id:''}')">บันทึกสูตร</button>
+    </div>
+  `);
+}
+function saveRecipe(id){
+  const name = document.getElementById('f_name').value.trim();
+  if(!name){ toast('กรุณากรอกชื่อเมนู'); return; }
+  const rows = document.querySelectorAll('#lineRows .line-row');
+  const items = [];
+  rows.forEach(row=>{
+    const ingredientId = row.querySelector('.rl-ing').value;
+    const qty = Number(row.querySelector('.rl-qty').value);
+    const unit = row.querySelector('.rl-unit').value.trim();
+    if(ingredientId && qty>0 && unit) items.push({ingredientId, qty, unit});
+  });
+  if(items.length===0){ toast('กรุณาเพิ่มวัตถุดิบอย่างน้อย 1 รายการ'); return; }
+  const costRows = document.querySelectorAll('#costRows .cost-line-row');
+  const otherCostItems = [];
+  costRows.forEach(row=>{
+    const cname = row.querySelector('.cl-name').value.trim();
+    const amount = Number(row.querySelector('.cl-amount').value)||0;
+    if(cname) otherCostItems.push({name:cname, amount});
+  });
+  const otherCost = otherCostItems.reduce((s,x)=>s+(Number(x.amount)||0),0);
+  const data = {
+    name, category: document.getElementById('f_category').value.trim(),
+    otherCostItems, otherCost,
+    items
+  };
+  if(id){ Object.assign(recipeById(id), data); }
+  else { DB.recipes.push({id:uid(), ...data}); }
+  save('recipes');
+  closeModal();
+  toast('บันทึกสูตรอาหารแล้ว');
+  RENDERERS.recipes();
+}
+function deleteRecipe(id){
+  if(!confirm('ลบสูตรอาหารนี้?')) return;
+  DB.recipes = DB.recipes.filter(r=>r.id!==id);
+  save('recipes');
+  toast('ลบสูตรอาหารแล้ว');
+  RENDERERS.recipes();
+}
+
+/* =========================================================
+   PRICING & PROFIT
+   ========================================================= */
+RENDERERS.pricing = function(){
+  if(DB.recipes.length===0){
+    document.getElementById('page-pricing').innerHTML = `
+      <div class="page-head"><div><h1 class="page-title">💰 ราคาขาย & กำไร</h1><p class="page-desc">กรุณาสร้างสูตรอาหารก่อนใช้งานหน้านี้</p></div></div>`;
+    return;
+  }
+  const sortedSales = [...DB.sales].sort((a,b)=> a.date<b.date?1:-1);
+  const filteredSales = sortedSales.filter(s=>{
+    if(saleFilter.platformId && s.platformId!==saleFilter.platformId) return false;
+    if(saleFilter.dateFrom && s.date < saleFilter.dateFrom) return false;
+    if(saleFilter.dateTo && s.date > saleFilter.dateTo) return false;
+    if(saleFilter.q){
+      const r = recipeById(s.recipeId);
+      const q = saleFilter.q.toLowerCase();
+      const hay = `${r?r.name:''}`.toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const salesToShow = filteredSales.slice(0,50);
+  const recentSales = salesToShow.map(s=>{
+    const r = recipeById(s.recipeId); const p = platformById(s.platformId); const promo = s.promotionId?promoById(s.promotionId):null;
+    return `<tr>
+      <td>${fmtDate(s.date)}</td>
+      <td class="cell-strong">${r?esc(r.name):'-'}</td>
+      <td>${p?esc(p.name):'-'}</td>
+      <td>${promo?esc(promo.name):'-'}</td>
+      <td class="num">${fmtNum(s.qty)}</td>
+      <td class="num">${fmtMoney(s.sellingPrice)}</td>
+      <td class="num">${fmtMoney(s.netRevenue)}</td>
+      <td class="num" style="font-weight:700;color:${s.actualProfit>=0?'var(--good)':'var(--danger)'}">${fmtMoney(s.actualProfit)}</td>
+      <td class="num">${fmtNum(s.profitMargin,1)}%</td>
+      <td><div class="row-actions">
+        <button class="icon-btn" title="แก้ไข" onclick="openEditSaleModal('${s.id}')">✏️</button>
+        <button class="icon-btn" title="ลบ" onclick="deleteSale('${s.id}')">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('') || `<tr class="empty-row"><td colspan="10">${sortedSales.length===0?'ยังไม่มีการบันทึกการขาย':'ไม่พบรายการที่ตรงกับการค้นหา/ตัวกรอง'}</td></tr>`;
+  const salesHistNote = filteredSales.length!==sortedSales.length
+    ? `พบ ${fmtNum(filteredSales.length)} จากทั้งหมด ${fmtNum(sortedSales.length)} รายการ${filteredSales.length>50?` · แสดง ${fmtNum(salesToShow.length)} รายการล่าสุด`:''}`
+    : `ทั้งหมด ${fmtNum(sortedSales.length)} รายการ${sortedSales.length>50?` · แสดง ${fmtNum(salesToShow.length)} รายการล่าสุด`:''}`;
+
+  document.getElementById('page-pricing').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="page-title">💰 ราคาขาย & กำไร</h1><p class="page-desc">คำนวณกำไรจริงต่อออเดอร์ และหาราคาขายที่เหมาะสม</p></div>
+    </div>
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">คำนวณกำไรจากออเดอร์</div>
+        <div class="form-grid">
+          <div class="field span-2"><label>เมนู</label><select id="p_recipe">${DB.recipes.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('')}</select></div>
+          <div class="field"><label>จำนวน (จาน)</label><input id="p_qty" type="number" step="1" value="1" min="1"></div>
+          <div class="field"><label>ราคาขาย/จาน (บาท)</label><input id="p_price" type="number" step="0.01" placeholder="เช่น 65"></div>
+          <div class="field"><label>Platform</label><select id="p_platform">${DB.platforms.map(pl=>`<option value="${pl.id}">${esc(pl.name)}</option>`).join('')}</select></div>
+          <div class="field"><label>Promotion</label><select id="p_promo"><option value="">ไม่มี</option>${DB.promotions.map(pr=>`<option value="${pr.id}">${esc(pr.name)}</option>`).join('')}</select></div>
+        </div>
+        <div class="calc-box" id="p_result"></div>
+        <div class="modal-foot" style="border-top:none;padding-top:6px;">
+          <button class="btn btn-primary" onclick="saveSaleFromPricing()">✅ บันทึกเป็นการขาย</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Reverse Price Calculator <small>หาราคาขายขั้นต่ำ</small></div>
+        <div class="form-grid cols-1">
+          <div class="field"><label>Food Cost ต่อจาน (บาท)</label><input id="r_foodcost" type="number" step="0.01" placeholder="เช่น 29"></div>
+          <div class="field"><label>Platform Fee (%)</label><input id="r_fee" type="number" step="0.01" placeholder="เช่น 25"></div>
+          <div class="field"><label>Promotion ต่อจาน (บาท)</label><input id="r_promo" type="number" step="0.01" placeholder="เช่น 10" value="0"></div>
+          <div class="field"><label>กำไรที่ต้องการต่อจาน (บาท)</label><input id="r_profit" type="number" step="0.01" placeholder="เช่น 20"></div>
+        </div>
+        <button class="btn btn-accent" style="margin-top:12px;width:100%;justify-content:center;" onclick="calcReversePrice()">คำนวณราคาขายขั้นต่ำ</button>
+        <div id="r_result"></div>
+        <div class="hint" style="margin-top:10px;color:var(--ink-faint);font-size:12px;">สูตร: (กำไรที่ต้องการ + Food Cost + Promotion) ÷ (1 − Platform Fee%)</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">🎯 ราคาขายแนะนำ <small>ตามเป้าหมายกำไรที่ตั้ง แต่ละช่องทาง</small></div>
+      <div class="form-grid">
+        <div class="field span-2"><label>เมนู</label><select id="sg_recipe">${DB.recipes.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>เป้าหมายกำไร</label>
+          <select id="sg_mode">
+            <option value="margin">% กำไรจากราคาขาย</option>
+            <option value="fixed">กำไรคงที่ต่อจาน (บาท)</option>
+          </select>
+        </div>
+        <div class="field"><label id="sg_target_label">เป้าหมาย (%)</label><input id="sg_target" type="number" step="0.1" value="30"></div>
+      </div>
+      <div id="sg_result" style="margin-top:14px;"></div>
+
+      <div class="panel-title" style="margin-top:26px;">⚖️ เปรียบเทียบ Platform <small>ถ้าขายราคาเดียวกันทุกช่องทาง เมนูนี้กำไรต่างกันแค่ไหน</small></div>
+      <div class="form-grid">
+        <div class="field span-2"><label>ราคาขาย/จาน (บาท) ที่จะใช้เปรียบเทียบ</label><input id="cp_price" type="number" step="0.01" placeholder="เช่น 65"></div>
+      </div>
+      <div id="cp_result" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">🧪 What-if Calculator <small>จำลองสถานการณ์ เทียบกับปัจจุบัน</small></div>
+      <div class="form-grid">
+        <div class="field span-2"><label>เมนู</label><select id="wi_recipe">${DB.recipes.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>ราคาขาย/จาน (บาท)</label><input id="wi_price" type="number" step="0.01" placeholder="เช่น 65"></div>
+        <div class="field"><label>จำนวน (จาน)</label><input id="wi_qty" type="number" step="1" min="1" value="1"></div>
+        <div class="field"><label>Platform</label><select id="wi_platform">${DB.platforms.map(pl=>`<option value="${pl.id}">${esc(pl.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>ปรับต้นทุนวัตถุดิบ (%) <span id="wi_costadj_val" style="color:var(--turmeric-deep);font-weight:600;">0%</span></label><input id="wi_costadj" type="range" min="-50" max="100" step="1" value="0"></div>
+        <div class="field"><label>ปรับค่าธรรมเนียม Platform (%) <span id="wi_feeadj_val" style="color:var(--turmeric-deep);font-weight:600;">0%</span></label><input id="wi_feeadj" type="range" min="-100" max="100" step="1" value="0"></div>
+      </div>
+      <div id="wi_result" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">ประวัติการขาย <small>${salesHistNote}</small></div>
+      <div class="toolbar">
+        <div class="search-box"><span class="ic">🔎</span><input id="saleSearch" placeholder="ค้นหาชื่อเมนู..." value="${esc(saleFilter.q)}"></div>
+        <select class="filter-select" id="salePlatformFilter">
+          <option value="">ทุกช่องทาง</option>
+          ${DB.platforms.map(pl=>`<option value="${pl.id}" ${saleFilter.platformId===pl.id?'selected':''}>${esc(pl.name)}</option>`).join('')}
+        </select>
+        <input class="filter-select" type="date" id="saleDateFrom" value="${saleFilter.dateFrom}" title="จากวันที่">
+        <input class="filter-select" type="date" id="saleDateTo" value="${saleFilter.dateTo}" title="ถึงวันที่">
+      </div>
+      <div class="table-scroll"><table class="data-table">
+        <thead><tr><th>วันที่</th><th>เมนู</th><th>ช่องทาง</th><th>โปรโมชั่น</th><th>จำนวน</th><th>ราคาขาย/จาน</th><th>Net Revenue</th><th>Actual Profit</th><th>Margin</th><th>จัดการ</th></tr></thead>
+        <tbody>${recentSales}</tbody>
+      </table></div>
+    </div>
+  `;
+  const inputs = ['p_recipe','p_qty','p_price','p_platform','p_promo'];
+  inputs.forEach(id=> document.getElementById(id).addEventListener('input', updatePricingCalc));
+  inputs.forEach(id=> document.getElementById(id).addEventListener('change', updatePricingCalc));
+  updatePricingCalc();
+  document.getElementById('saleSearch').addEventListener('input', e=>{ saleFilter.q=e.target.value; RENDERERS.pricing(); });
+  document.getElementById('salePlatformFilter').addEventListener('change', e=>{ saleFilter.platformId=e.target.value; RENDERERS.pricing(); });
+  document.getElementById('saleDateFrom').addEventListener('change', e=>{ saleFilter.dateFrom=e.target.value; RENDERERS.pricing(); });
+  document.getElementById('saleDateTo').addEventListener('change', e=>{ saleFilter.dateTo=e.target.value; RENDERERS.pricing(); });
+
+  /* ---- ราคาขายแนะนำ + เปรียบเทียบ Platform ---- */
+  document.getElementById('sg_recipe').addEventListener('change', ()=>{ updateSuggestedPrice(); updatePlatformCompare(); });
+  document.getElementById('sg_mode').addEventListener('change', e=>{
+    document.getElementById('sg_target_label').textContent = e.target.value==='margin' ? 'เป้าหมาย (%)' : 'เป้าหมาย (บาท/จาน)';
+    document.getElementById('sg_target').value = e.target.value==='margin' ? 30 : 20;
+    updateSuggestedPrice();
+  });
+  document.getElementById('sg_target').addEventListener('input', updateSuggestedPrice);
+  document.getElementById('cp_price').addEventListener('input', updatePlatformCompare);
+  updateSuggestedPrice();
+  updatePlatformCompare();
+
+  /* ---- What-if Calculator ---- */
+  const wiInputs = ['wi_recipe','wi_price','wi_qty','wi_platform'];
+  wiInputs.forEach(id=> document.getElementById(id).addEventListener('input', updateWhatIf));
+  wiInputs.forEach(id=> document.getElementById(id).addEventListener('change', updateWhatIf));
+  document.getElementById('wi_costadj').addEventListener('input', updateWhatIf);
+  document.getElementById('wi_feeadj').addEventListener('input', updateWhatIf);
+  updateWhatIf();
+};
+function updatePricingCalc(){
+  const recipeId = document.getElementById('p_recipe').value;
+  const qty = Number(document.getElementById('p_qty').value)||0;
+  const price = Number(document.getElementById('p_price').value)||0;
+  const platformId = document.getElementById('p_platform').value;
+  const promoId = document.getElementById('p_promo').value;
+  const f = computeSaleFigures(recipeId, qty||1, platformId, promoId||null, price);
+  const rc = f.recipe ? computeRecipeCost(f.recipe) : null;
+  const unitErrorBanner = (rc && rc.hasUnitError) ? `<div class="result-callout" style="border-color:var(--danger);margin-bottom:10px;"><div class="sub" style="color:var(--danger);font-weight:600;">⚠️ สูตรนี้มีวัตถุดิบหน่วยไม่ตรงกัน คำนวณ Food Cost ไม่ได้ถูกต้อง จึงยังบันทึกการขายไม่ได้ กรุณาแก้ไขหน่วยในหน้าสูตรอาหารก่อน</div></div>` : '';
+  document.getElementById('p_result').innerHTML = `
+    ${unitErrorBanner}
+    <div class="calc-row"><span>ยอดขายรวม (Gross)</span><span>${fmtMoney(f.gross)}</span></div>
+    <div class="calc-row"><span>Food Cost รวม</span><span class="neg">-${fmtMoney(f.foodCostTotal)}</span></div>
+    <div class="calc-row"><span>Platform Fee</span><span class="neg">-${fmtMoney(f.platformFeeAmt)}</span></div>
+    <div class="calc-row"><span>Payment Fee</span><span class="neg">-${fmtMoney(f.paymentFeeAmt)}</span></div>
+    <div class="calc-row"><span>Other Fee</span><span class="neg">-${fmtMoney(f.otherFeeAmt)}</span></div>
+    <div class="calc-row"><span>Promotion (ร้านรับผิดชอบ)</span><span class="neg">-${fmtMoney(f.promoStoreShare)}</span></div>
+    <div class="calc-row"><span>Net Revenue</span><span>${fmtMoney(f.netRevenue)}</span></div>
+    <div class="calc-row total"><span>Actual Profit</span><span style="color:${f.actualProfit>=0?'var(--good)':'var(--danger)'}">${fmtMoney(f.actualProfit)} บาท</span></div>
+    <div class="calc-row"><span>Profit Margin</span><span>${fmtNum(f.profitMargin,1)}%</span></div>
+  `;
+}
+function saveSaleFromPricing(){
+  const recipeId = document.getElementById('p_recipe').value;
+  const qty = Number(document.getElementById('p_qty').value);
+  const price = Number(document.getElementById('p_price').value);
+  const platformId = document.getElementById('p_platform').value;
+  const promoId = document.getElementById('p_promo').value;
+  if(!qty || qty<=0 || !price || price<=0){ toast('กรุณากรอกจำนวนและราคาขายให้ถูกต้อง'); return; }
+  const result = recordSale(recipeId, qty, platformId, promoId||null, price, todayStr());
+  if(!result.success){ toast(result.error); return; }
+  toast('บันทึกการขายและตัด Stock แล้ว');
+  RENDERERS.pricing();
+};
+function openEditSaleModal(id){
+  const s = DB.sales.find(x=>x.id===id);
+  if(!s){ toast('ไม่พบรายการขายนี้'); return; }
+  openModal('แก้ไขรายการขาย', `
+    <div class="form-grid">
+      <div class="field span-2"><label>เมนู</label>
+        <select id="es_recipe">${DB.recipes.map(r=>`<option value="${r.id}" ${s.recipeId===r.id?'selected':''}>${esc(r.name)}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>วันที่ขาย</label><input id="es_date" type="date" value="${s.date}"></div>
+      <div class="field"><label>จำนวน (จาน)</label><input id="es_qty" type="number" step="1" min="1" value="${s.qty}"></div>
+      <div class="field"><label>ราคาขาย/จาน (บาท)</label><input id="es_price" type="number" step="0.01" value="${s.sellingPrice}"></div>
+      <div class="field"><label>Platform</label><select id="es_platform">${DB.platforms.map(pl=>`<option value="${pl.id}" ${s.platformId===pl.id?'selected':''}>${esc(pl.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>Promotion</label><select id="es_promo"><option value="">ไม่มี</option>${DB.promotions.map(pr=>`<option value="${pr.id}" ${s.promotionId===pr.id?'selected':''}>${esc(pr.name)}</option>`).join('')}</select></div>
+    </div>
+    <div class="hint" style="margin-top:2px;color:var(--ink-faint);font-size:12px;">💡 การแก้ไขจะคืน Stock เดิมของรายการนี้ แล้วตัด Stock ใหม่ตามค่าที่แก้ไข (ระบบจะไม่ยอมบันทึกถ้าทำให้ Stock ติดลบ)</div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveEditSale('${s.id}')">บันทึกการแก้ไข</button>
+    </div>
+  `);
+}
+function saveEditSale(id){
+  const recipeId = document.getElementById('es_recipe').value;
+  const date = document.getElementById('es_date').value || todayStr();
+  const qty = Number(document.getElementById('es_qty').value);
+  const price = Number(document.getElementById('es_price').value);
+  const platformId = document.getElementById('es_platform').value;
+  const promoId = document.getElementById('es_promo').value;
+  if(!qty || qty<=0 || !price || price<=0){ toast('กรุณากรอกจำนวนและราคาขายให้ถูกต้อง'); return; }
+  const result = updateSale(id, recipeId, qty, platformId, promoId||null, price, date);
+  if(!result.success){ toast(result.error); return; }
+  closeModal();
+  toast('แก้ไขรายการขายแล้ว และปรับ Stock ให้ถูกต้อง');
+  RENDERERS.pricing();
+}
+function calcReversePrice(){
+  const foodCost = Number(document.getElementById('r_foodcost').value)||0;
+  const feePct = Number(document.getElementById('r_fee').value)||0;
+  const promo = Number(document.getElementById('r_promo').value)||0;
+  const targetProfit = Number(document.getElementById('r_profit').value)||0;
+  const denom = 1-(feePct/100);
+  const box = document.getElementById('r_result');
+  if(denom<=0){
+    box.innerHTML = `<div class="result-callout" style="border-color:var(--danger);"><div class="sub" style="color:var(--danger);">Platform Fee ต้องน้อยกว่า 100%</div></div>`;
+    return;
+  }
+  const price = (targetProfit+foodCost+promo)/denom;
+  const rounded = Math.ceil(price);
+  box.innerHTML = `<div class="result-callout">
+    <div class="big">${fmtMoney(price)} บาท</div>
+    <div class="sub">ราคาขายขั้นต่ำที่ควรตั้ง — แนะนำตั้งราคา ${rounded} บาท</div>
+  </div>`;
+}
+
+/* ---- ราคาขายแนะนำ ต่อช่องทาง (ตามเป้าหมายกำไร) ---- */
+function updateSuggestedPrice(){
+  const recipeId = document.getElementById('sg_recipe').value;
+  const mode = document.getElementById('sg_mode').value;
+  const target = Number(document.getElementById('sg_target').value)||0;
+  const recipe = recipeById(recipeId);
+  const box = document.getElementById('sg_result');
+  if(!recipe){ box.innerHTML=''; return; }
+  const rc = computeRecipeCost(recipe);
+  if(rc.hasUnitError){
+    box.innerHTML = `<div class="result-callout" style="border-color:var(--danger);"><div class="sub" style="color:var(--danger);font-weight:600;">⚠️ สูตรนี้มีวัตถุดิบหน่วยไม่ตรงกัน คำนวณราคาแนะนำไม่ได้ กรุณาแก้ไขหน่วยในสูตรก่อน</div></div>`;
+    return;
+  }
+  const foodCost = rc.total;
+  const computed = DB.platforms.map(pl=>{
+    const feePct = (Number(pl.feePercent)||0) + (Number(pl.paymentFeePercent)||0);
+    const otherFee = Number(pl.otherFee)||0;
+    let price, errMsg=null;
+    if(mode==='margin'){
+      const denom = 1 - (feePct/100) - (target/100);
+      if(denom<=0){ errMsg='ค่าธรรมเนียมรวมเป้าหมายกำไร ≥ 100%'; }
+      else price = (foodCost + otherFee) / denom;
+    } else {
+      const denom = 1 - (feePct/100);
+      if(denom<=0){ errMsg='ค่าธรรมเนียม ≥ 100%'; }
+      else price = (foodCost + otherFee + target) / denom;
+    }
+    if(errMsg) return {pl, errMsg};
+    const f = computeSaleFigures(recipeId, 1, pl.id, null, price);
+    return {pl, price, f};
+  });
+  const valid = computed.filter(x=>!x.errMsg);
+  const bestId = valid.length ? valid.reduce((a,b)=> b.f.actualProfit>a.f.actualProfit?b:a).pl.id : null;
+  const tableRows = computed.map(x=>{
+    if(x.errMsg) return `<tr><td class="cell-strong">${esc(x.pl.name)}</td><td colspan="4" style="color:var(--danger);">คำนวณไม่ได้ (${esc(x.errMsg)})</td></tr>`;
+    return `<tr>
+      <td class="cell-strong">${esc(x.pl.name)}${x.pl.id===bestId?' <span class="tag-pill" style="color:var(--good);border-color:var(--good-bg);">🏆 คุ้มที่สุด</span>':''}</td>
+      <td class="num">${fmtMoney(x.price)}</td>
+      <td class="num">${fmtMoney(x.f.netRevenue)}</td>
+      <td class="num" style="font-weight:700;color:${x.f.actualProfit>=0?'var(--good)':'var(--danger)'}">${fmtMoney(x.f.actualProfit)}</td>
+      <td class="num">${fmtNum(x.f.profitMargin,1)}%</td>
+    </tr>`;
+  }).join('') || `<tr class="empty-row"><td colspan="5">ยังไม่มีช่องทางขาย</td></tr>`;
+  box.innerHTML = `
+    <div class="hint" style="color:var(--ink-faint);font-size:12.5px;margin-bottom:8px;">Food Cost ต่อจาน: <strong>${fmtMoney(foodCost)}</strong> บาท — ราคาที่แต่ละช่องทางควรตั้ง เพื่อให้ได้กำไรตามเป้าหมายหลังหักค่าธรรมเนียมของช่องทางนั้น</div>
+    <div class="table-scroll"><table class="data-table">
+      <thead><tr><th>ช่องทาง</th><th>ราคาขายแนะนำ</th><th>Net Revenue</th><th>กำไร/จาน</th><th>Margin</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table></div>
+  `;
+}
+
+/* ---- เปรียบเทียบกำไรของแต่ละ Platform ที่ราคาขายเดียวกัน ---- */
+function updatePlatformCompare(){
+  const recipeId = document.getElementById('sg_recipe').value;
+  const price = Number(document.getElementById('cp_price').value)||0;
+  const recipe = recipeById(recipeId);
+  const box = document.getElementById('cp_result');
+  if(!recipe || price<=0){
+    box.innerHTML = `<div class="muted" style="padding:6px 2px;color:var(--ink-faint);font-size:13px;">กรอกราคาขายด้านบนเพื่อเปรียบเทียบกำไรของแต่ละช่องทาง</div>`;
+    return;
+  }
+  const rc = computeRecipeCost(recipe);
+  if(rc.hasUnitError){
+    box.innerHTML = `<div class="result-callout" style="border-color:var(--danger);"><div class="sub" style="color:var(--danger);font-weight:600;">⚠️ สูตรนี้มีวัตถุดิบหน่วยไม่ตรงกัน คำนวณไม่ได้ กรุณาแก้ไขหน่วยในสูตรก่อน</div></div>`;
+    return;
+  }
+  if(DB.platforms.length===0){ box.innerHTML = `<div class="muted" style="padding:6px 2px;color:var(--ink-faint);font-size:13px;">ยังไม่มีช่องทางขาย</div>`; return; }
+  const results = DB.platforms.map(pl=> ({pl, f: computeSaleFigures(recipeId, 1, pl.id, null, price)}));
+  const maxProfit = Math.max(...results.map(x=>x.f.actualProfit), 0);
+  const minProfit = Math.min(...results.map(x=>x.f.actualProfit));
+  box.innerHTML = results.map(x=>{
+    const isBest = x.f.actualProfit===maxProfit && maxProfit>minProfit;
+    const width = maxProfit>0 ? Math.max(0, x.f.actualProfit/maxProfit*100) : (x.f.actualProfit<0?0:100);
+    return `<div class="bar-item">
+      <div class="bar-item-top"><span class="name">${esc(x.pl.name)}${isBest?' 🏆':''}</span><span class="val" style="color:${x.f.actualProfit>=0?'var(--turmeric-deep)':'var(--danger)'}">${fmtMoney(x.f.actualProfit)} บาท · ${fmtNum(x.f.profitMargin,1)}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${width}%;${x.f.actualProfit<0?'background:var(--danger);':''}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ---- What-if Calculator ---- */
+function updateWhatIf(){
+  const recipeId = document.getElementById('wi_recipe').value;
+  const price = Number(document.getElementById('wi_price').value)||0;
+  const qty = Number(document.getElementById('wi_qty').value)||1;
+  const platformId = document.getElementById('wi_platform').value;
+  const costAdjPct = Number(document.getElementById('wi_costadj').value)||0;
+  const feeAdjPct = Number(document.getElementById('wi_feeadj').value)||0;
+  document.getElementById('wi_costadj_val').textContent = (costAdjPct>=0?'+':'')+costAdjPct+'%';
+  document.getElementById('wi_feeadj_val').textContent = (feeAdjPct>=0?'+':'')+feeAdjPct+'%';
+
+  const recipe = recipeById(recipeId);
+  const platform = platformById(platformId);
+  const box = document.getElementById('wi_result');
+  if(!recipe || !platform || price<=0){
+    box.innerHTML = `<div class="muted" style="padding:6px 2px;color:var(--ink-faint);font-size:13px;">กรอกราคาขายเพื่อเริ่มจำลองสถานการณ์</div>`;
+    return;
+  }
+  const rc = computeRecipeCost(recipe);
+  if(rc.hasUnitError){
+    box.innerHTML = `<div class="result-callout" style="border-color:var(--danger);"><div class="sub" style="color:var(--danger);font-weight:600;">⚠️ สูตรนี้มีวัตถุดิบหน่วยไม่ตรงกัน คำนวณไม่ได้ กรุณาแก้ไขหน่วยในสูตรก่อน</div></div>`;
+    return;
+  }
+
+  // Baseline: ราคา/จำนวน/ช่องทางที่เลือก โดยใช้ต้นทุนและค่าธรรมเนียมปกติ
+  const baseline = computeSaleFigures(recipeId, qty, platformId, null, price);
+
+  // What-if: ปรับต้นทุนวัตถุดิบและค่าธรรมเนียม platform ตามเปอร์เซ็นต์ที่ตั้ง
+  const adjustedFoodCostUnit = rc.total * (1 + costAdjPct/100);
+  const adjustedFeePct = Math.max(0, (Number(platform.feePercent)||0) * (1 + feeAdjPct/100));
+  const gross = price*qty;
+  const platformFeeAmt = gross*(adjustedFeePct/100);
+  const paymentFeeAmt = gross*((Number(platform.paymentFeePercent)||0)/100);
+  const otherFeeAmt = Number(platform.otherFee)||0;
+  const foodCostTotal = adjustedFoodCostUnit*qty;
+  const netRevenue = gross - platformFeeAmt - paymentFeeAmt - otherFeeAmt;
+  const actualProfit = netRevenue - foodCostTotal;
+  const profitMargin = gross>0 ? (actualProfit/gross*100) : 0;
+
+  const deltaProfit = actualProfit - baseline.actualProfit;
+  const deltaMargin = profitMargin - baseline.profitMargin;
+
+  box.innerHTML = `
+    <div class="two-col">
+      <div class="calc-box">
+        <div class="hint" style="font-weight:700;margin-bottom:6px;color:var(--ink-soft);">ปัจจุบัน (Baseline)</div>
+        <div class="calc-row"><span>Food Cost รวม</span><span class="neg">-${fmtMoney(baseline.foodCostTotal)}</span></div>
+        <div class="calc-row"><span>Platform Fee</span><span class="neg">-${fmtMoney(baseline.platformFeeAmt)}</span></div>
+        <div class="calc-row"><span>Net Revenue</span><span>${fmtMoney(baseline.netRevenue)}</span></div>
+        <div class="calc-row total"><span>กำไร</span><span style="color:${baseline.actualProfit>=0?'var(--good)':'var(--danger)'}">${fmtMoney(baseline.actualProfit)} บาท</span></div>
+        <div class="calc-row"><span>Margin</span><span>${fmtNum(baseline.profitMargin,1)}%</span></div>
+      </div>
+      <div class="calc-box" style="border-color:var(--turmeric);border-style:solid;">
+        <div class="hint" style="font-weight:700;margin-bottom:6px;color:var(--turmeric-deep);">What-if</div>
+        <div class="calc-row"><span>Food Cost รวม</span><span class="neg">-${fmtMoney(foodCostTotal)}</span></div>
+        <div class="calc-row"><span>Platform Fee</span><span class="neg">-${fmtMoney(platformFeeAmt)}</span></div>
+        <div class="calc-row"><span>Net Revenue</span><span>${fmtMoney(netRevenue)}</span></div>
+        <div class="calc-row total"><span>กำไร</span><span style="color:${actualProfit>=0?'var(--good)':'var(--danger)'}">${fmtMoney(actualProfit)} บาท</span></div>
+        <div class="calc-row"><span>Margin</span><span>${fmtNum(profitMargin,1)}%</span></div>
+      </div>
+    </div>
+    <div class="result-callout" style="margin-top:12px;border-color:${deltaProfit>=0?'var(--good)':'var(--danger)'};">
+      <div class="sub">เทียบกับปัจจุบัน: กำไรเปลี่ยน <strong style="color:${deltaProfit>=0?'var(--good)':'var(--danger)'}">${deltaProfit>=0?'+':''}${fmtMoney(deltaProfit)} บาท</strong> (Margin ${deltaMargin>=0?'+':''}${fmtNum(deltaMargin,1)}%)</div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   PLATFORMS
+   ========================================================= */
+RENDERERS.platforms = function(){
+  const rows = DB.platforms.map(p=>`<tr>
+    <td class="cell-strong">${esc(p.name)}</td>
+    <td class="num">${fmtNum(p.feePercent,2)}%</td>
+    <td class="num">${fmtNum(p.paymentFeePercent,2)}%</td>
+    <td class="num">${fmtMoney(p.otherFee)} บาท/ออเดอร์</td>
+    <td><div class="row-actions">
+      <button class="icon-btn" onclick="openPlatformModal('${p.id}')">✏️</button>
+      <button class="icon-btn" onclick="deletePlatform('${p.id}')">🗑️</button>
+    </div></td>
+  </tr>`).join('') || `<tr class="empty-row"><td colspan="5">ยังไม่มีช่องทางขาย</td></tr>`;
+
+  document.getElementById('page-platforms').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="page-title">🏪 Platform</h1><p class="page-desc">กำหนดค่าธรรมเนียมของแต่ละช่องทางขายด้วยตัวเอง ระบบไม่ Hard-code ค่าใดๆ</p></div>
+      <div class="page-actions"><button class="btn btn-accent" onclick="openPlatformModal()">+ เพิ่มช่องทาง</button></div>
+    </div>
+    <div class="panel">
+      <div class="table-scroll"><table class="data-table">
+        <thead><tr><th>ช่องทาง</th><th>Platform Fee</th><th>Payment Fee</th><th>Other Fee</th><th>จัดการ</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>
+  `;
+};
+function openPlatformModal(id){
+  const p = id ? platformById(id) : null;
+  openModal(p?'แก้ไขช่องทาง':'เพิ่มช่องทางขาย', `
+    <div class="form-grid">
+      <div class="field span-2"><label>ชื่อช่องทาง</label><input id="f_name" value="${p?esc(p.name):''}" placeholder="เช่น GrabFood"></div>
+      <div class="field"><label>Platform Fee (%)</label><input id="f_fee" type="number" step="0.01" value="${p?p.feePercent:0}"></div>
+      <div class="field"><label>Payment Fee (%)</label><input id="f_payfee" type="number" step="0.01" value="${p?p.paymentFeePercent:0}"></div>
+      <div class="field span-2"><label>Other Fee (บาท/ออเดอร์)</label><input id="f_otherfee" type="number" step="0.01" value="${p?p.otherFee:0}"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="savePlatform('${p?p.id:''}')">บันทึก</button>
+    </div>
+  `);
+}
+function savePlatform(id){
+  const name = document.getElementById('f_name').value.trim();
+  if(!name){ toast('กรุณากรอกชื่อช่องทาง'); return; }
+  const data = {
+    name,
+    feePercent: Number(document.getElementById('f_fee').value)||0,
+    paymentFeePercent: Number(document.getElementById('f_payfee').value)||0,
+    otherFee: Number(document.getElementById('f_otherfee').value)||0,
+  };
+  if(id){ Object.assign(platformById(id), data); }
+  else{ DB.platforms.push({id:uid(), ...data}); }
+  save('platforms');
+  closeModal();
+  toast('บันทึกช่องทางขายแล้ว');
+  RENDERERS.platforms();
+}
+function deletePlatform(id){
+  if(!confirm('ลบช่องทางขายนี้?')) return;
+  DB.platforms = DB.platforms.filter(p=>p.id!==id);
+  save('platforms');
+  toast('ลบช่องทางขายแล้ว');
+  RENDERERS.platforms();
+}
+
+/* =========================================================
+   PROMOTIONS
+   ========================================================= */
+RENDERERS.promotions = function(){
+  const respLabel = {store:'ร้านรับผิดชอบทั้งหมด', platform:'Platform รับผิดชอบทั้งหมด', split:'แบ่งกันรับผิดชอบ'};
+  const rows = DB.promotions.map(p=>`<tr>
+    <td class="cell-strong">${esc(p.name)}</td>
+    <td class="num">${p.type==='percent'?fmtNum(p.value,2)+'%':fmtMoney(p.value)+' บาท'}</td>
+    <td>${respLabel[p.responsibility]}${p.responsibility==='split'?` (ร้าน ${fmtNum(p.splitStorePercent,0)}%)`:''}</td>
+    <td><div class="row-actions">
+      <button class="icon-btn" onclick="openPromotionModal('${p.id}')">✏️</button>
+      <button class="icon-btn" onclick="deletePromotion('${p.id}')">🗑️</button>
+    </div></td>
+  </tr>`).join('') || `<tr class="empty-row"><td colspan="4">ยังไม่มีโปรโมชั่น</td></tr>`;
+
+  document.getElementById('page-promotions').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="page-title">🎟 Promotion</h1><p class="page-desc">กำหนดส่วนลดและผู้รับผิดชอบ ระบบจะนำเฉพาะส่วนที่ร้านรับผิดชอบไปคำนวณกำไร</p></div>
+      <div class="page-actions"><button class="btn btn-accent" onclick="openPromotionModal()">+ เพิ่มโปรโมชั่น</button></div>
+    </div>
+    <div class="panel">
+      <div class="table-scroll"><table class="data-table">
+        <thead><tr><th>ชื่อโปรโมชั่น</th><th>ส่วนลด</th><th>ผู้รับผิดชอบ</th><th>จัดการ</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>
+  `;
+};
+function openPromotionModal(id){
+  const p = id ? promoById(id) : null;
+  openModal(p?'แก้ไขโปรโมชั่น':'เพิ่มโปรโมชั่น', `
+    <div class="form-grid">
+      <div class="field span-2"><label>ชื่อโปรโมชั่น</label><input id="f_name" value="${p?esc(p.name):''}" placeholder="เช่น ลด 15% ร่วมแคมเปญ"></div>
+      <div class="field"><label>ประเภทส่วนลด</label>
+        <select id="f_type">
+          <option value="percent" ${p&&p.type==='percent'?'selected':''}>ลดเป็น %</option>
+          <option value="amount" ${p&&p.type==='amount'?'selected':''}>ลดเป็นจำนวนเงิน (บาท)</option>
+        </select>
+      </div>
+      <div class="field"><label>ค่าส่วนลด</label><input id="f_value" type="number" step="0.01" value="${p?p.value:''}"></div>
+      <div class="field span-2"><label>ผู้รับผิดชอบส่วนลด</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="f_resp" value="store" ${(!p||p.responsibility==='store')?'checked':''}> ร้านรับผิดชอบทั้งหมด</label>
+          <label class="radio-opt"><input type="radio" name="f_resp" value="platform" ${p&&p.responsibility==='platform'?'checked':''}> Platform รับผิดชอบทั้งหมด</label>
+          <label class="radio-opt"><input type="radio" name="f_resp" value="split" ${p&&p.responsibility==='split'?'checked':''}> แบ่งกันรับผิดชอบ</label>
+        </div>
+      </div>
+      <div class="field span-2" id="splitWrap" style="display:${p&&p.responsibility==='split'?'flex':'none'};">
+        <label>ร้านรับผิดชอบกี่ % ของส่วนลด</label><input id="f_split" type="number" step="1" value="${p&&p.splitStorePercent!==undefined?p.splitStorePercent:50}">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="savePromotion('${p?p.id:''}')">บันทึก</button>
+    </div>
+  `);
+  document.querySelectorAll('input[name="f_resp"]').forEach(r=>{
+    r.addEventListener('change', e=>{
+      document.getElementById('splitWrap').style.display = e.target.value==='split' ? 'flex':'none';
+    });
+  });
+}
+function savePromotion(id){
+  const name = document.getElementById('f_name').value.trim();
+  if(!name){ toast('กรุณากรอกชื่อโปรโมชั่น'); return; }
+  const responsibility = document.querySelector('input[name="f_resp"]:checked').value;
+  const data = {
+    name,
+    type: document.getElementById('f_type').value,
+    value: Number(document.getElementById('f_value').value)||0,
+    responsibility,
+    splitStorePercent: responsibility==='split' ? (Number(document.getElementById('f_split').value)||0) : (responsibility==='store'?100:0)
+  };
+  if(id){ Object.assign(promoById(id), data); }
+  else{ DB.promotions.push({id:uid(), ...data}); }
+  save('promotions');
+  closeModal();
+  toast('บันทึกโปรโมชั่นแล้ว');
+  RENDERERS.promotions();
+}
+function deletePromotion(id){
+  if(!confirm('ลบโปรโมชั่นนี้?')) return;
+  DB.promotions = DB.promotions.filter(p=>p.id!==id);
+  save('promotions');
+  toast('ลบโปรโมชั่นแล้ว');
+  RENDERERS.promotions();
+}
+
+/* =========================================================
+   FIXED OVERHEAD & BREAK-EVEN
+   ========================================================= */
+RENDERERS.overhead = function(){
+  const items = DB.settings.fixedOverhead || [];
+  const total = totalMonthlyOverhead();
+  const rows = items.map(o=>`<tr>
+    <td class="cell-strong">${esc(o.name)}</td>
+    <td class="num">${fmtMoney(o.amount)} บาท/เดือน</td>
+    <td><div class="row-actions">
+      <button class="icon-btn" onclick="openOverheadModal('${o.id}')">✏️</button>
+      <button class="icon-btn" onclick="deleteOverheadItem('${o.id}')">🗑️</button>
+    </div></td>
+  </tr>`).join('') || `<tr class="empty-row"><td colspan="3">ยังไม่มีรายการต้นทุนคงที่ — เพิ่มค่าเช่า ค่าแรง ค่าน้ำค่าไฟ เพื่อให้คำนวณกำไรสุทธิและจุดคุ้มทุนได้แม่นยำขึ้น</td></tr>`;
+
+  document.getElementById('page-overhead').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="page-title">🏛 ต้นทุนคงที่รายเดือน</h1><p class="page-desc">ค่าเช่า ค่าแรง ค่าน้ำค่าไฟ และค่าใช้จ่ายประจำอื่นๆ — ใช้คำนวณกำไรสุทธิจริงและจุดคุ้มทุน ไม่ใช่แค่กำไรขั้นต้น</p></div>
+      <div class="page-actions"><button class="btn btn-accent" onclick="openOverheadModal()">+ เพิ่มรายการ</button></div>
+    </div>
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">รายการต้นทุนคงที่ <small>ต่อเดือน</small></div>
+        <div class="table-scroll"><table class="data-table">
+          <thead><tr><th>รายการ</th><th>จำนวนเงิน</th><th>จัดการ</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+        <div class="calc-row total" style="margin-top:4px;"><span>รวมต้นทุนคงที่ต่อเดือน</span><span>${fmtMoney(total)} บาท</span></div>
+        <div class="calc-row"><span>เฉลี่ยต่อวัน (÷30)</span><span>${fmtMoney(total/30)} บาท</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">🎯 จุดคุ้มทุน (Break-even)</div>
+        <p class="page-desc" style="margin:-4px 0 12px;">ต้องขายกี่จานต่อวัน ถึงจะครอบคลุมต้นทุนคงที่ทั้งหมด — คำนวณจากกำไรขั้นต้นเฉลี่ยต่อจาน</p>
+        <div class="form-grid">
+          <div class="field span-2">
+            <label>คำนวณกำไรเฉลี่ยต่อจานจาก</label>
+            <select id="be_scope" onchange="updateBreakEven()">
+              <option value="all">ทุกเมนู (เฉลี่ยจากยอดขายจริงทั้งหมด)</option>
+              ${DB.recipes.map(r=>`<option value="${r.id}">เฉพาะเมนู: ${esc(r.name)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field span-2">
+            <label>หรือกรอกกำไรเฉลี่ยต่อจานเอง (บาท) <span style="font-weight:400;color:var(--ink-faint);">— เว้นว่างถ้าให้คำนวณจากยอดขายจริง</span></label>
+            <input id="be_manual" type="number" step="0.01" placeholder="เช่น 25" oninput="updateBreakEven()">
+          </div>
+        </div>
+        <div class="calc-box" id="be_result"></div>
+      </div>
+    </div>
+  `;
+  updateBreakEven();
+};
+
+function updateBreakEven(){
+  const scopeEl = document.getElementById('be_scope');
+  const manualEl = document.getElementById('be_manual');
+  if(!scopeEl || !manualEl) return;
+  const scope = scopeEl.value;
+  const manualRaw = manualEl.value;
+  const manual = manualRaw!=='' ? Number(manualRaw) : null;
+  const totalOverhead = totalMonthlyOverhead();
+  const perDay = totalOverhead/30;
+  const resultEl = document.getElementById('be_result');
+
+  if(totalOverhead<=0){
+    resultEl.innerHTML = `<div class="muted" style="padding:6px 2px;">ยังไม่ได้กรอกต้นทุนคงที่ — เพิ่มรายการด้านซ้ายก่อนเพื่อคำนวณจุดคุ้มทุน</div>`;
+    return;
+  }
+
+  let avgProfit = 0, basisNote = '';
+  if(manual!==null && !isNaN(manual)){
+    avgProfit = manual;
+    basisNote = 'กำหนดเอง';
+  } else {
+    const sales = scope==='all' ? DB.sales : DB.sales.filter(s=>s.recipeId===scope);
+    const qtyBasis = sales.reduce((s,x)=>s+x.qty,0);
+    const profitSum = sales.reduce((s,x)=>s+x.actualProfit,0);
+    avgProfit = qtyBasis>0 ? profitSum/qtyBasis : 0;
+    basisNote = qtyBasis>0 ? `เฉลี่ยจากยอดขายจริง ${fmtNum(qtyBasis)} จาน` : 'ยังไม่มีประวัติการขาย ลองกรอกกำไรเฉลี่ยต่อจานเอง';
+  }
+
+  if(avgProfit<=0){
+    resultEl.innerHTML = `
+      <div class="calc-row"><span>ต้นทุนคงที่ต่อวัน</span><span>${fmtMoney(perDay)} บาท</span></div>
+      <div class="calc-row"><span>กำไรขั้นต้นเฉลี่ยต่อจาน</span><span class="neg">${fmtMoney(avgProfit)} บาท <small class="muted">(${basisNote})</small></span></div>
+      <div class="result-callout" style="border-color:var(--danger);margin-top:10px;">
+        <div class="sub" style="color:var(--danger);font-weight:600;">⚠️ กำไรเฉลี่ยต่อจาน${avgProfit<0?'ติดลบ':'เท่ากับศูนย์'} — ยังคำนวณจุดคุ้มทุนไม่ได้ ต้องปรับราคาขายหรือลดต้นทุนก่อน</div>
+      </div>`;
+    return;
+  }
+
+  const perDayDishes = perDay/avgProfit;
+  const perMonthDishes = totalOverhead/avgProfit;
+  resultEl.innerHTML = `
+    <div class="calc-row"><span>รวมต้นทุนคงที่ต่อเดือน</span><span>${fmtMoney(totalOverhead)} บาท</span></div>
+    <div class="calc-row"><span>ต้นทุนคงที่ต่อวัน (÷30)</span><span>${fmtMoney(perDay)} บาท</span></div>
+    <div class="calc-row"><span>กำไรขั้นต้นเฉลี่ยต่อจาน</span><span>${fmtMoney(avgProfit)} บาท <small class="muted">(${basisNote})</small></span></div>
+    <div class="result-callout">
+      <div class="big">${fmtNum(perDayDishes,1)} จาน/วัน</div>
+      <div class="sub">ต้องขายอย่างน้อยเท่านี้ต่อวันถึงจะคุ้มทุนคงที่ (≈ ${fmtNum(perMonthDishes,0)} จาน/เดือน)</div>
+    </div>
+  `;
+}
+
+function openOverheadModal(id){
+  const o = id ? (DB.settings.fixedOverhead||[]).find(x=>x.id===id) : null;
+  openModal(o?'แก้ไขต้นทุนคงที่':'เพิ่มต้นทุนคงที่', `
+    <div class="form-grid">
+      <div class="field span-2"><label>รายการ</label><input id="f_name" value="${o?esc(o.name):''}" placeholder="เช่น ค่าเช่าร้าน, ค่าแรงพนักงาน, ค่าน้ำ-ค่าไฟ"></div>
+      <div class="field span-2"><label>จำนวนเงินต่อเดือน (บาท)</label><input id="f_amount" type="number" step="0.01" value="${o?o.amount:''}"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveOverheadItem('${o?o.id:''}')">บันทึก</button>
+    </div>
+  `);
+}
+function saveOverheadItem(id){
+  const name = document.getElementById('f_name').value.trim();
+  const amount = Number(document.getElementById('f_amount').value)||0;
+  if(!name){ toast('กรุณากรอกชื่อรายการ'); return; }
+  if(!DB.settings.fixedOverhead) DB.settings.fixedOverhead = [];
+  if(id){
+    const o = DB.settings.fixedOverhead.find(x=>x.id===id);
+    if(o) Object.assign(o, {name, amount});
+  } else {
+    DB.settings.fixedOverhead.push({id:uid(), name, amount});
+  }
+  save('settings');
+  closeModal();
+  toast('บันทึกต้นทุนคงที่แล้ว');
+  RENDERERS.overhead();
+}
+function deleteOverheadItem(id){
+  if(!confirm('ลบรายการต้นทุนคงที่นี้?')) return;
+  DB.settings.fixedOverhead = (DB.settings.fixedOverhead||[]).filter(x=>x.id!==id);
+  save('settings');
+  toast('ลบรายการแล้ว');
+  RENDERERS.overhead();
+}
+
+/* =========================================================
+   MONTHLY REPORTS & EXPORT
+   ========================================================= */
+let reportMonth = todayStr().slice(0,7); // 'YYYY-MM'
+function setReportMonth(v){
+  if(!v) return;
+  reportMonth = v;
+  RENDERERS.reports();
+}
+function monthlySummary(monthKey){
+  const start = monthKey+'-01';
+  const end = monthKey+'-'+String(daysInMonthOf(monthKey)).padStart(2,'0');
+  const sales = DB.sales.filter(s=>s.date>=start && s.date<=end);
+  const sumField = (arr,f)=>arr.reduce((s,x)=>s+x[f],0);
+  const totalRevenue = sumField(sales,'gross');
+  const totalFoodCost = sumField(sales,'foodCostTotal');
+  const totalPlatformFee = sales.reduce((s,x)=>s+x.platformFeeAmt+x.paymentFeeAmt+x.otherFeeAmt,0);
+  const totalPromo = sumField(sales,'promoStoreShare');
+  const grossProfit = sumField(sales,'actualProfit');
+  const overhead = totalMonthlyOverhead();
+  const netProfit = grossProfit - overhead;
+  const qty = sales.reduce((s,x)=>s+x.qty,0);
+  const byRecipe = {};
+  sales.forEach(s=>{
+    if(!byRecipe[s.recipeId]) byRecipe[s.recipeId] = {qty:0, revenue:0, foodCost:0, profit:0};
+    byRecipe[s.recipeId].qty += s.qty;
+    byRecipe[s.recipeId].revenue += s.gross;
+    byRecipe[s.recipeId].foodCost += s.foodCostTotal;
+    byRecipe[s.recipeId].profit += s.actualProfit;
+  });
+  const byDay = {};
+  sales.forEach(s=>{
+    if(!byDay[s.date]) byDay[s.date] = {qty:0, revenue:0, foodCost:0, profit:0};
+    byDay[s.date].qty += s.qty;
+    byDay[s.date].revenue += s.gross;
+    byDay[s.date].foodCost += s.foodCostTotal;
+    byDay[s.date].profit += s.actualProfit;
+  });
+  return {start, end, sales, totalRevenue, totalFoodCost, totalPlatformFee, totalPromo, grossProfit, overhead, netProfit, qty, byRecipe, byDay};
+}
+
+RENDERERS.reports = function(){
+  const m = monthlySummary(reportMonth);
+  const recipeRows = Object.entries(m.byRecipe).map(([rid,v])=>{
+    const r = recipeById(rid);
+    return `<tr><td class="cell-strong">${esc(r?r.name:'(ลบแล้ว)')}</td><td class="num">${fmtNum(v.qty)}</td><td class="num">${fmtMoney(v.revenue)}</td><td class="num">${fmtMoney(v.foodCost)}</td><td class="num" style="color:${v.profit>=0?'var(--good)':'var(--danger)'};font-weight:600;">${fmtMoney(v.profit)}</td></tr>`;
+  }).join('') || `<tr class="empty-row"><td colspan="5">ไม่มีข้อมูลการขายในเดือนนี้</td></tr>`;
+
+  const dailyRows = Object.keys(m.byDay).sort().map(d=>{
+    const v = m.byDay[d];
+    return `<tr><td>${fmtDate(d)}</td><td class="num">${fmtNum(v.qty)}</td><td class="num">${fmtMoney(v.revenue)}</td><td class="num" style="color:${v.profit>=0?'var(--good)':'var(--danger)'};font-weight:600;">${fmtMoney(v.profit)}</td></tr>`;
+  }).join('') || `<tr class="empty-row"><td colspan="4">ไม่มีข้อมูล</td></tr>`;
+
+  document.getElementById('page-reports').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="page-title">🧾 รายงานสรุปรายเดือน</h1><p class="page-desc">สรุปยอดขาย ต้นทุน และกำไรรายเดือน สำหรับเก็บบัญชีหรือยื่นภาษี — export เป็น Excel หรือ PDF ได้</p></div>
+      <div class="page-actions">
+        <input type="month" id="reportMonthInput" value="${reportMonth}" onchange="setReportMonth(this.value)" style="border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:var(--radius-s);font-size:13.5px;">
+        <button class="btn" onclick="exportReportExcel()">⬇️ Excel</button>
+        <button class="btn btn-accent" onclick="exportReportPDF()">⬇️ PDF</button>
+      </div>
+    </div>
+
+    <div class="cards-row">
+      <div class="stat-card" style="--accent:var(--turmeric)"><div class="stat-label">ยอดขายรวม</div><div class="stat-value">${fmtMoney(m.totalRevenue)}</div><div class="stat-note">${fmtNum(m.qty)} จาน</div></div>
+      <div class="stat-card" style="--accent:var(--turmeric)"><div class="stat-label">Food Cost รวม</div><div class="stat-value">${fmtMoney(m.totalFoodCost)}</div><div class="stat-note">บาท</div></div>
+      <div class="stat-card" style="--accent:var(--clay)"><div class="stat-label">ค่าธรรมเนียม Platform รวม</div><div class="stat-value">${fmtMoney(m.totalPlatformFee)}</div><div class="stat-note">บาท</div></div>
+      <div class="stat-card" style="--accent:var(--chili)"><div class="stat-label">Promotion ร้านรับผิดชอบ</div><div class="stat-value">${fmtMoney(m.totalPromo)}</div><div class="stat-note">บาท</div></div>
+      <div class="stat-card" style="--accent:var(--herb)"><div class="stat-label">กำไรขั้นต้น</div><div class="stat-value">${fmtMoney(m.grossProfit)}</div><div class="stat-note">ก่อนหักต้นทุนคงที่</div></div>
+      <div class="stat-card" style="--accent:var(--good)"><div class="stat-label">กำไรสุทธิ</div><div class="stat-value" style="color:${m.netProfit>=0?'var(--good-deep,#3F6B3F)':'var(--danger)'}">${fmtMoney(m.netProfit)}</div><div class="stat-note">หลังหักต้นทุนคงที่ ${fmtMoney(m.overhead)} บาท</div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">สรุปตามเมนู <small>เดือน ${fmtDate(m.start)} – ${fmtDate(m.end)}</small></div>
+        <div class="table-scroll"><table class="data-table"><thead><tr><th>เมนู</th><th>จำนวน</th><th>ยอดขาย</th><th>Food Cost</th><th>กำไร</th></tr></thead><tbody>${recipeRows}</tbody></table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">สรุปรายวัน</div>
+        <div class="table-scroll"><table class="data-table"><thead><tr><th>วันที่</th><th>จำนวน</th><th>ยอดขาย</th><th>กำไร</th></tr></thead><tbody>${dailyRows}</tbody></table></div>
+      </div>
+    </div>
+  `;
+};
+
+function exportReportExcel(){
+  if(typeof XLSX==='undefined'){ toast('โหลดไลบรารี Excel ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); return; }
+  const m = monthlySummary(reportMonth);
+  try{
+    const summaryData = [
+      ['รายงานสรุปยอดขาย/กำไร', reportMonth],
+      ['ช่วงวันที่', `${m.start} ถึง ${m.end}`],
+      [],
+      ['รายการ','จำนวนเงิน (บาท)'],
+      ['ยอดขายรวม', m.totalRevenue],
+      ['Food Cost รวม', m.totalFoodCost],
+      ['ค่าธรรมเนียม Platform รวม', m.totalPlatformFee],
+      ['Promotion ร้านรับผิดชอบ', m.totalPromo],
+      ['กำไรขั้นต้น', m.grossProfit],
+      ['ต้นทุนคงที่รายเดือน', m.overhead],
+      ['กำไรสุทธิ', m.netProfit],
+      ['จำนวนจานที่ขาย', m.qty],
+    ];
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+
+    const recipeData = [['เมนู','จำนวน','ยอดขาย','Food Cost','กำไร']];
+    Object.entries(m.byRecipe).forEach(([rid,v])=>{
+      const r = recipeById(rid);
+      recipeData.push([r?r.name:'(ลบแล้ว)', v.qty, v.revenue, v.foodCost, v.profit]);
+    });
+    const wsRecipe = XLSX.utils.aoa_to_sheet(recipeData);
+
+    const dailyData = [['วันที่','จำนวน','ยอดขาย','Food Cost','กำไร']];
+    Object.keys(m.byDay).sort().forEach(d=>{
+      const v = m.byDay[d];
+      dailyData.push([d, v.qty, v.revenue, v.foodCost, v.profit]);
+    });
+    const wsDaily = XLSX.utils.aoa_to_sheet(dailyData);
+
+    const detailData = [['วันที่','เมนู','ช่องทาง','จำนวน','ราคาขาย/หน่วย','ยอดขาย','Food Cost','กำไร']];
+    m.sales.slice().sort((a,b)=> a.date<b.date?-1:(a.date>b.date?1:0)).forEach(s=>{
+      const r = recipeById(s.recipeId), p = platformById(s.platformId);
+      detailData.push([s.date, r?r.name:'-', p?p.name:'-', s.qty, s.sellingPrice, s.gross, s.foodCostTotal, s.actualProfit]);
+    });
+    const wsDetail = XLSX.utils.aoa_to_sheet(detailData);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'สรุป');
+    XLSX.utils.book_append_sheet(wb, wsRecipe, 'ตามเมนู');
+    XLSX.utils.book_append_sheet(wb, wsDaily, 'รายวัน');
+    XLSX.utils.book_append_sheet(wb, wsDetail, 'รายการขาย');
+    XLSX.writeFile(wb, `รายงาน-${reportMonth}.xlsx`);
+    toast('ดาวน์โหลดรายงาน Excel แล้ว');
+  } catch(e){
+    toast('เกิดข้อผิดพลาดขณะสร้างไฟล์ Excel');
+  }
+}
+
+function exportReportPDF(){
+  const m = monthlySummary(reportMonth);
+  const recipeRows = Object.entries(m.byRecipe).map(([rid,v])=>{
+    const r = recipeById(rid);
+    return `<tr><td>${esc(r?r.name:'(ลบแล้ว)')}</td><td style="text-align:center">${fmtNum(v.qty)}</td><td style="text-align:center">${fmtMoney(v.revenue)}</td><td style="text-align:center">${fmtMoney(v.foodCost)}</td><td style="text-align:center">${fmtMoney(v.profit)}</td></tr>`;
+  }).join('') || '<tr><td colspan="5">ไม่มีข้อมูล</td></tr>';
+
+  const win = window.open('', '_blank');
+  if(!win){ toast('เบราว์เซอร์บล็อก popup กรุณาอนุญาตแล้วลองใหม่'); return; }
+  win.document.write(`<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>รายงาน ${reportMonth}</title>
+    <style>
+      body{font-family:'Sarabun','Tahoma',sans-serif;padding:32px;color:#2A2420;}
+      h1{font-size:20px;margin-bottom:2px;}
+      p.sub{color:#6E6255;margin-top:0;}
+      table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px;}
+      th,td{border:1px solid #E6D8BE;padding:6px 10px;text-align:center;}
+      th{background:#FBF5E9;}
+      .kv{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #EFE4CE;font-size:14px;max-width:420px;}
+      .kv b{font-weight:700;}
+      .total{font-size:16px;font-weight:700;margin-top:6px;}
+      @media print{ body{padding:10px;} }
+    </style></head>
+    <body>
+      <h1>รายงานสรุปยอดขายและกำไร</h1>
+      <p class="sub">เดือน ${fmtDate(m.start)} – ${fmtDate(m.end)}</p>
+      <div class="kv"><span>ยอดขายรวม</span><b>${fmtMoney(m.totalRevenue)} บาท</b></div>
+      <div class="kv"><span>Food Cost รวม</span><b>${fmtMoney(m.totalFoodCost)} บาท</b></div>
+      <div class="kv"><span>ค่าธรรมเนียม Platform รวม</span><b>${fmtMoney(m.totalPlatformFee)} บาท</b></div>
+      <div class="kv"><span>Promotion ร้านรับผิดชอบ</span><b>${fmtMoney(m.totalPromo)} บาท</b></div>
+      <div class="kv"><span>กำไรขั้นต้น</span><b>${fmtMoney(m.grossProfit)} บาท</b></div>
+      <div class="kv"><span>ต้นทุนคงที่รายเดือน</span><b>${fmtMoney(m.overhead)} บาท</b></div>
+      <div class="kv total"><span>กำไรสุทธิ</span><b>${fmtMoney(m.netProfit)} บาท</b></div>
+      <h3 style="margin-top:24px;">สรุปตามเมนู</h3>
+      <table><thead><tr><th>เมนู</th><th style="text-align:center">จำนวน</th><th style="text-align:center">ยอดขาย</th><th style="text-align:center">Food Cost</th><th style="text-align:center">กำไร</th></tr></thead>
+      <tbody>${recipeRows}</tbody></table>
+      <p style="margin-top:24px;color:#9C9080;font-size:11px;">พิมพ์จากระบบ Food Cost & Profit Manager เมื่อ ${fmtDate(todayStr())}</p>
+    </body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{ win.print(); }, 350);
+}
+
+/* ---------------- Init ---------------- */
+(function init(){
+  loadAll();
+  showPage('dashboard');
+})();
+</script>
+</body>
+</html>
